@@ -6,6 +6,7 @@ class CustomTheme {
   static const Color lightSecondaryColor = Color(0xFFFDDDD0);
   static const Color darkPrimaryColor = Colors.white;
   static const Color darkSecondaryColor = Color(0xFFB0B0B0);
+  static const Color mainBackgroundColor = Color(0xFFF6F4F1);
 
   // ✅ 공통 Typography 설정
   static const TextTheme textTheme = TextTheme(
