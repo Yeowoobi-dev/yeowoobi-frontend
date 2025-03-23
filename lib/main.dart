@@ -12,9 +12,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Yeowoobi',
-      theme: CustomTheme.lightTheme, // ✅ 라이트 테마 적용
-      darkTheme: CustomTheme.darkTheme, // ✅ 다크 테마 적용
-      themeMode: ThemeMode.system, // ✅ 시스템 설정에 따라 다크/라이트 모드 자동 변경
+      theme: CustomTheme.lightTheme, // 라이트 테마 적용
+      darkTheme: CustomTheme.darkTheme, // 다크 테마 적용
+      themeMode: ThemeMode.system, // 시스템 설정
       home: SplashScreen(),
     );
   }

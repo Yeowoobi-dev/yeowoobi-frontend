@@ -23,20 +23,20 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // ✅ 현재 테마 가져오기
+    final theme = Theme.of(context); // 현재 테마 가져오기
     final bool isDarkMode = theme.brightness == Brightness.dark; // ✅ 다크 모드 확인
     final Color backgroundColor = isDarkMode
         ? CustomTheme.darkPrimaryColor // 다크 모드 배경색
         : CustomTheme.lightPrimaryColor; // 라이트 모드 배경색
 
     return Scaffold(
-      backgroundColor: backgroundColor, // ✅ 테마 색상 적용
+      backgroundColor: backgroundColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/logo.png', // ✅ 앱 로고
+              'assets/image/icon_white.png',
               width: 150,
               fit: BoxFit.contain,
             ),
