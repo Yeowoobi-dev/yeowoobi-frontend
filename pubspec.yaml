@@ -22,5 +22,7 @@ flutter:
   uses-material-design: true
 
   assets:
-     - assets/logo.png
-     - assets/icon.png
+     - assets/image/icon_white.png
+     - assets/image/icon_orange.png
+     - assets/image/kakao_login_large_wide.png
+     - assets/image/fox.png
