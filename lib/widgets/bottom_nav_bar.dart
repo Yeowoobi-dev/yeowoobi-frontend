@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:yeowoobi_frontend/assets/theme/custom_theme.dart'; // ✅ 테마 가져오기
+import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int currentIndex;
