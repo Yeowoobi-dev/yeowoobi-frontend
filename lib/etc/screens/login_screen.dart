@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
+import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,6 +15,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _showIntroductionForm = false;
 
   final TextEditingController _nicknameController = TextEditingController();
+  final TextEditingController _introductionController = TextEditingController();
+
   bool _isValid = false;
   Set<String> _selectedKeywords = {};
 
@@ -36,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
     '육아',
     '경제/금융',
     '스릴러/공포',
-    '여우비'
+    '여우비',
   ];
 
   @override
@@ -45,6 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
     _nicknameController.addListener(_validate);
   }
 
+  // 닉네임 유효성 검사
   void _validate() {
     final text = _nicknameController.text.trim();
     final isValidFormat = RegExp(r'^[가-힣a-zA-Z0-9]+$').hasMatch(text);
@@ -56,30 +59,34 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void dispose() {
     _nicknameController.dispose();
+    _introductionController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: CustomTheme.mainBackgroundColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
           child: _showIntroductionForm
-              ? _buildIntroductionForm()
+              ? _buildIntroductionForm(cs, theme)
               : _showKeywordForm
-                  ? _buildKeywordSelectionForm()
+                  ? _buildKeywordSelectionForm(cs, theme)
                   : _showNicknameForm
-                      ? _buildNicknameForm()
-                      : _buildLoginView(),
+                      ? _buildNicknameForm(cs, theme)
+                      : _buildLoginView(cs, theme),
         ),
       ),
     );
   }
 
-  /// [1] 카카오 로그인 첫 화면
-  Widget _buildLoginView() {
+  // [1] 로그인 화면
+  Widget _buildLoginView(ColorScheme cs, ThemeData theme) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -89,69 +96,38 @@ class _LoginScreenState extends State<LoginScreen> {
             Image.asset('assets/image/fox.png',
                 width: 180, fit: BoxFit.contain),
             const SizedBox(height: 40),
-            const Text(
-              "여우비에 오신 것을\n환영해요 :)",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87),
-            ),
+            Text("여우비에 오신 것을\n환영해요 :)",
+                textAlign: TextAlign.center,
+                style: theme.textTheme.headlineMedium),
             const SizedBox(height: 12),
-            const Text(
-              "서비스 이용을 위해 로그인 해주세요.",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black54),
-            ),
+            Text("서비스 이용을 위해 로그인 해주세요.",
+                textAlign: TextAlign.center, style: theme.textTheme.bodyMedium),
           ],
         ),
         GestureDetector(
-          onTap: () {
-            setState(() {
-              _showNicknameForm = true;
-            });
-          },
-          child: Image.asset(
-            'assets/image/kakao_login_large_wide.png',
-            width: double.infinity,
-            fit: BoxFit.contain,
-          ),
+          onTap: () => setState(() => _showNicknameForm = true),
+          child: Image.asset('assets/image/kakao_login_large_wide.png',
+              width: double.infinity, fit: BoxFit.contain),
         ),
       ],
     );
   }
 
-  /// [2] 닉네임 입력 폼
-  Widget _buildNicknameForm() {
+  // [2] 닉네임 설정 화면
+  Widget _buildNicknameForm(ColorScheme cs, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Transform.translate(
-          offset: const Offset(-8, 0), // 왼쪽으로 8px 이동
+          offset: const Offset(-8, 0),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-            onPressed: () {
-              setState(() {
-                _showKeywordForm = false;
-                _showNicknameForm = true;
-              });
-            },
+            icon: Icon(Icons.arrow_back_ios, color: cs.primary),
+            onPressed: () => setState(() => _showNicknameForm = false),
           ),
         ),
-        // const SizedBox(height: 16),
-        const Text(
-          "닉네임을\n설정해주세요.",
-          style: TextStyle(
-              fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black),
-        ),
+        Text("닉네임을\n설정해주세요.", style: theme.textTheme.headlineMedium),
         const SizedBox(height: 16),
-        const Text(
-          "여우비가 당신을 어떻게 부르면 될까요?",
-          style: TextStyle(fontSize: 16, color: Colors.black),
-        ),
+        Text("여우비가 당신을 어떻게 부르면 될까요?", style: theme.textTheme.bodyMedium),
         const SizedBox(height: 32),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,29 +135,21 @@ class _LoginScreenState extends State<LoginScreen> {
             TextField(
               controller: _nicknameController,
               maxLength: 10,
-              style: const TextStyle(fontSize: 15, color: Colors.black),
+              style: theme.textTheme.bodyLarge,
               decoration: InputDecoration(
                 hintText: '닉네임을 입력하세요',
                 filled: true,
-                fillColor: CustomTheme.mainBackgroundColor,
+                fillColor: Theme.of(context).scaffoldBackgroundColor,
                 border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
                 counterText: '',
                 contentPadding:
                     const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
               ),
             ),
-            Container(
-              height: 1.5,
-              width: double.infinity,
-              color: Colors.grey,
-            ),
+            Container(height: 1.5, color: CustomTheme.neutral200),
             const SizedBox(height: 10),
-            Text(
-              '(${_nicknameController.text.length}/10)',
-              style: const TextStyle(fontSize: 13, color: Colors.grey),
-            ),
+            Text('(${_nicknameController.text.length}/10)',
+                style: theme.textTheme.bodySmall),
           ],
         ),
         const Spacer(),
@@ -190,85 +158,73 @@ class _LoginScreenState extends State<LoginScreen> {
           height: 48,
           child: ElevatedButton(
             onPressed: _isValid
-                ? () {
-                    setState(() {
+                ? () => setState(() {
                       _showNicknameForm = false;
                       _showKeywordForm = true;
-                    });
-                  }
+                    })
                 : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor:
-                  _isValid ? CustomTheme.lightPrimaryColor : Colors.grey[100],
-              foregroundColor: _isValid ? Colors.white : Colors.black38,
+              backgroundColor: _isValid ? cs.primary : Colors.white,
+              foregroundColor: _isValid ? Colors.white : cs.secondary,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
               elevation: 0,
             ),
-            child: const Text("입력 완료", style: TextStyle(fontSize: 16)),
+            child: const Text("다음",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                )),
           ),
         ),
-        const SizedBox(height: 20), // 하단 간격
+        const SizedBox(height: 20),
       ],
     );
   }
 
-  /// [3] 키워드 선택 화면
-  Widget _buildKeywordSelectionForm() {
+  Widget _buildKeywordSelectionForm(ColorScheme cs, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Transform.translate(
-          offset: const Offset(-8, 0), // 왼쪽으로 8px 이동
+          offset: const Offset(-8, 0),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-            onPressed: () {
-              setState(() {
-                _showKeywordForm = false;
-                _showNicknameForm = true;
-              });
-            },
+            icon: Icon(Icons.arrow_back_ios, color: cs.primary),
+            onPressed: () => setState(() {
+              _showKeywordForm = false;
+              _showNicknameForm = true;
+            }),
           ),
         ),
-        // const SizedBox(height: 16),
-        Text(
-          "${_nicknameController.text}님의 독서취향을\n알고싶어요!",
-          style: const TextStyle(
-              fontSize: 32, fontWeight: FontWeight.bold, color: Colors.black),
-        ),
+        Text("${_nicknameController.text}님의 독서취향을\n알고싶어요!",
+            style: theme.textTheme.headlineMedium),
         const SizedBox(height: 12),
-        Text(
-          "관심있는 키워드를 선택하시면\n여우비가 ${_nicknameController.text}님의 책장을 꾸며드릴게요.",
-          style: const TextStyle(fontSize: 16, color: Colors.black),
-        ),
+        Text("관심있는 키워드를 선택하시면\n여우비가 ${_nicknameController.text}님의 책장을 꾸며드릴게요.",
+            style: theme.textTheme.bodyMedium),
         const SizedBox(height: 24),
         Wrap(
           spacing: 8,
           runSpacing: 12,
           children: _keywords.map((keyword) {
-            final isSelected = _selectedKeywords.contains(keyword);
+            final selected = _selectedKeywords.contains(keyword);
             return GestureDetector(
-              onTap: () {
-                setState(() {
-                  isSelected
-                      ? _selectedKeywords.remove(keyword)
-                      : _selectedKeywords.add(keyword);
-                });
-              },
+              onTap: () => setState(() {
+                selected
+                    ? _selectedKeywords.remove(keyword)
+                    : _selectedKeywords.add(keyword);
+              }),
               child: Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color(0xFF9C5A3C)
-                      : const Color(0xFFF1ECE8),
+                  color: selected ? cs.tertiary : CustomTheme.neutral100,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   keyword,
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black87,
-                    fontWeight: FontWeight.w500,
+                    color: selected ? Colors.white : cs.tertiary,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -281,81 +237,63 @@ class _LoginScreenState extends State<LoginScreen> {
           height: 48,
           child: ElevatedButton(
             onPressed: _selectedKeywords.isNotEmpty
-                ? () {
-                    setState(() {
+                ? () => setState(() {
                       _showKeywordForm = false;
                       _showIntroductionForm = true;
-                    });
-                  }
+                    })
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: _selectedKeywords.isNotEmpty
-                  ? CustomTheme.lightPrimaryColor
-                  : Colors.grey[200],
+                  ? cs.primary
+                  : cs.secondary.withValues(alpha: (0.3 * 255)),
               foregroundColor:
-                  _selectedKeywords.isNotEmpty ? Colors.white : Colors.black38,
+                  _selectedKeywords.isNotEmpty ? Colors.white : cs.secondary,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+                  borderRadius: BorderRadius.circular(10)),
               elevation: 0,
             ),
-            child: const Text("선택 완료", style: TextStyle(fontSize: 16)),
+            child: const Text("다음",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                )),
           ),
         ),
-        const SizedBox(height: 20), // 하단 간격
+        const SizedBox(height: 20),
       ],
     );
   }
 
-  /// [4] 소개글 입력 화면
-  Widget _buildIntroductionForm() {
-    final TextEditingController _introductionController =
-        TextEditingController();
-
+  Widget _buildIntroductionForm(ColorScheme cs, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Transform.translate(
-          offset: const Offset(-8, 0), // 왼쪽으로 8px 이동
+          offset: const Offset(-8, 0),
           child: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-            onPressed: () {
-              setState(() {
-                _showIntroductionForm = false;
-                _showKeywordForm = true;
-              });
-            },
+            icon: Icon(Icons.arrow_back_ios, color: cs.primary),
+            onPressed: () => setState(() {
+              _showIntroductionForm = false;
+              _showKeywordForm = true;
+            }),
           ),
         ),
-        Text(
-          "${_nicknameController.text}님이 \n궁금해요!",
-          style: const TextStyle(
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        ),
+        Text("${_nicknameController.text}님이 \n궁금해요!",
+            style: theme.textTheme.headlineMedium),
         const SizedBox(height: 12),
-        Text(
-          "${_nicknameController.text}님을 소개해주세요.",
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.black,
-          ),
-        ),
+        Text("${_nicknameController.text}님을 소개해주세요.",
+            style: theme.textTheme.bodyMedium),
         const SizedBox(height: 32),
         TextField(
           controller: _introductionController,
           maxLines: 5,
           maxLength: 100,
-          style: const TextStyle(fontSize: 15, color: Colors.black),
+          style: theme.textTheme.bodyLarge,
           decoration: InputDecoration(
             hintText: '소개글을 입력하세요',
             filled: true,
-            fillColor: CustomTheme.mainBackgroundColor,
+            fillColor: Theme.of(context).scaffoldBackgroundColor,
             border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
             counterText: '',
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
@@ -367,21 +305,23 @@ class _LoginScreenState extends State<LoginScreen> {
           height: 48,
           child: ElevatedButton(
             onPressed: () {
-              print("입력된 소개글: ${_introductionController.text}");
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const HomeScreen()),
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: CustomTheme.lightPrimaryColor,
+              backgroundColor: cs.primary,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+                  borderRadius: BorderRadius.circular(10)),
               elevation: 0,
             ),
-            child: const Text("입력 완료", style: TextStyle(fontSize: 16)),
+            child: const Text("완료",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                )),
           ),
         ),
         const SizedBox(height: 20),
