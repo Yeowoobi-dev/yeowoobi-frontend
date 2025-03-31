@@ -27,3 +27,4 @@ flutter:
      - assets/image/kakao_login_large_wide.png
      - assets/image/fox.png
      - assets/icons/
+     - assets/dummy.json
