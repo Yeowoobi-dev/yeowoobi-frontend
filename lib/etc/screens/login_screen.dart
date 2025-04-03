@@ -63,6 +63,9 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  final FocusNode _nicknameFocusNode = FocusNode();
+  final FocusNode _introductionFocusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -182,6 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // [3] 키워드 선택 화면
   Widget _buildKeywordSelectionForm(ColorScheme cs, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -264,6 +268,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  // [4] 소개글 설정 화면
   Widget _buildIntroductionForm(ColorScheme cs, ThemeData theme) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
