@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:yeowoobi_frontend/book_log/models/book.dart';
 import 'package:yeowoobi_frontend/book_log/services/book_service.dart';
+import 'package:yeowoobi_frontend/book_log/screens/book_write_screen.dart';
 
 class BookLogScreen extends StatefulWidget {
   const BookLogScreen({super.key});
@@ -23,7 +24,7 @@ class _BookLogScreenState extends State<BookLogScreen> {
   @override
   void initState() {
     super.initState();
-    _bookFuture = BookService.fetchDummyBooks().then((books) {
+    _bookFuture = MyBookLogService.fetchDummyBooks().then((books) {
       _allBooks = books;
       return books;
     });
@@ -36,7 +37,7 @@ class _BookLogScreenState extends State<BookLogScreen> {
   }
 
   Future<void> _refreshBooks() async {
-    final books = await BookService.fetchDummyBooks();
+    final books = await MyBookLogService.fetchDummyBooks();
     setState(() {
       _allBooks = books;
       _bookFuture = Future.value(books);
@@ -221,17 +222,37 @@ class _BookLogScreenState extends State<BookLogScreen> {
       // 5. 하단 floating 버튼
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(bottom: 12.0),
-        child: Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-          child: const Padding(
-            padding: EdgeInsets.all(15.0),
-            child: ImageIcon(AssetImage('assets/icons/write.png'),
-                color: Colors.white),
+        child: GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              PageRouteBuilder(
+                pageBuilder: (context, animation, secondaryAnimation) =>
+                    const BookWriteScreen(),
+                transitionsBuilder:
+                    (context, animation, secondaryAnimation, child) {
+                  final tween =
+                      Tween(begin: const Offset(0, 1), end: Offset.zero)
+                          .chain(CurveTween(curve: Curves.ease));
+                  return SlideTransition(
+                    position: animation.drive(tween),
+                    child: child,
+                  );
+                },
+              ),
+            );
+          },
+          child: Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(15.0),
+              child: ImageIcon(AssetImage('assets/icons/write.png'),
+                  color: Colors.white),
+            ),
           ),
         ),
       ),
