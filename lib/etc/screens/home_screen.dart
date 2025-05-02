@@ -34,7 +34,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-        // ✅ IndexedStack으로 변경하여 상태 유지
+        // IndexedStack으로 변경하여 상태 유지
         index: _selectedIndex,
         children: _screens,
       ),
