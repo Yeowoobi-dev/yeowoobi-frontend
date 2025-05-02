@@ -31,3 +31,4 @@ flutter:
      - assets/icons/
      - assets/dummy.json
      - assets/new.json
+     - assets/template.json
