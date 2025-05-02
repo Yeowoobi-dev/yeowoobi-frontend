@@ -15,12 +15,17 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
   final FocusNode _editorFocusNode = FocusNode();
   final ScrollController _editorScrollController = ScrollController();
   final TextEditingController _titleController = TextEditingController();
+  double? _currentFontSize;
+  Attribute<dynamic> _currentAlignment = Attribute.leftAlignment;
+  IconData _currentAlignmentIcon = Icons.format_align_left;
 
   @override
   void initState() {
     super.initState();
     _controller = QuillController.basic();
-    _controller.document = Document()..insert(0, 'Start writing your notes...');
+    _titleController.addListener(() {
+      setState(() {});
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_editorFocusNode);
     });
@@ -42,87 +47,214 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top App Bar
+            // 앱바 영역
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    onPressed: () => Navigator.of(context).pop(),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 0.0),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      // onPressed: () => Navigator.pop(context).pop(),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: const Text('임시 저장하시겠습니까?'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).pop(); // 저장 안 하고 나가기
+                                  },
+                                  child: const Text('작성취소'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    // TODO: Implement temp save logic here
+                                    Navigator.of(context).pop(); // 저장하고 나가기
+                                  },
+                                  child: const Text('임시저장'),
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ),
                   const Spacer(),
+                  IconButton(
+                    // 키패드 버튼
+                    icon: const Icon(Icons.keyboard),
+                    onPressed: () {
+                      if (FocusScope.of(context).hasFocus) {
+                        FocusScope.of(context).unfocus();
+                      } else {
+                        FocusScope.of(context).requestFocus(_editorFocusNode);
+                      }
+                    },
+                  ),
+                  IconButton(
+                    // 저장 버튼
+                    icon: const Icon(Icons.save),
+                    onPressed: () {
+                      // TODO: Implement save logic
+                    },
+                  ),
                 ],
               ),
             ),
-            // Title Input and Divider
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: TextField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  hintText: '제목을 입력하세요!',
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(
-                    color: CustomTheme.neutral200,
-                    fontSize: 20,
-                  ),
-                ),
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            Divider(thickness: 0.5, color: CustomTheme.neutral300),
-            // Editor 영역 - Expanded
+            // 제목 입력 및 에디터 영역
             Expanded(
-              child: QuillEditor(
-                focusNode: _editorFocusNode,
-                scrollController: _editorScrollController,
-                controller: _controller,
-                config: QuillEditorConfig(
-                  placeholder: '책을 읽고 어떤 생각이 들었나요?',
-                  padding: const EdgeInsets.all(16),
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      child: TextField(
+                        controller: _titleController,
+                        decoration: InputDecoration(
+                          hintText: '제목을 입력하세요!',
+                          border: InputBorder.none,
+                          hintStyle: TextStyle(
+                            color: CustomTheme.neutral200,
+                            fontSize: 20,
+                          ),
+                        ),
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Divider(
+                          thickness: 0.5, color: CustomTheme.neutral200),
+                    ),
+                    QuillEditor(
+                      focusNode: _editorFocusNode,
+                      scrollController: _editorScrollController,
+                      controller: _controller,
+                      config: QuillEditorConfig(
+                        padding: const EdgeInsets.all(18), // 좌우 여백
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            // Toolbar 영역
+            // 툴바 영역
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Divider(thickness: 0.5, color: CustomTheme.neutral200),
+            ),
             Container(
-              height: 56,
+              height: 40,
               color: CustomTheme.neutral100,
               child: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
                   children: [
                     QuillToolbarHistoryButton(
+                      // 되돌리기
                       isUndo: true,
                       controller: _controller,
                     ),
                     QuillToolbarHistoryButton(
+                      // 되돌리기 취소
                       isUndo: false,
                       controller: _controller,
                     ),
                     QuillToolbarToggleStyleButton(
-                      options: const QuillToolbarToggleStyleButtonOptions(),
+                      // 볼드체
                       controller: _controller,
                       attribute: Attribute.bold,
                     ),
                     QuillToolbarToggleStyleButton(
-                      options: const QuillToolbarToggleStyleButtonOptions(),
+                      // 이탤릭체
                       controller: _controller,
                       attribute: Attribute.italic,
                     ),
                     QuillToolbarToggleStyleButton(
+                      // 밑줄
                       controller: _controller,
                       attribute: Attribute.underline,
                     ),
                     QuillToolbarToggleStyleButton(
+                      // 취소선
                       controller: _controller,
                       attribute: Attribute.strikeThrough,
                     ),
-                    QuillToolbarSelectHeaderStyleDropdownButton(
+                    QuillToolbarToggleStyleButton(
+                      // 인용구
                       controller: _controller,
+                      attribute: Attribute.blockQuote,
+                    ),
+                    /*QuillToolbarSelectHeaderStyleDropdownButton(
+                      // 헤더 스타일
+                      controller: _controller,
+                    ),*/
+                    /*QuillToolbarSelectAlignmentButton(
+                      controller: _controller,
+                    ),*/
+                    IconButton(
+                      // 정렬
+                      icon: Icon(_currentAlignmentIcon),
+                      onPressed: () {
+                        setState(() {
+                          if (_currentAlignment == Attribute.leftAlignment) {
+                            _currentAlignment = Attribute.centerAlignment;
+                            _currentAlignmentIcon = Icons.format_align_center;
+                          } else if (_currentAlignment ==
+                              Attribute.centerAlignment) {
+                            _currentAlignment = Attribute.rightAlignment;
+                            _currentAlignmentIcon = Icons.format_align_right;
+                          } else {
+                            _currentAlignment = Attribute.leftAlignment;
+                            _currentAlignmentIcon = Icons.format_align_left;
+                          }
+                          _controller.formatSelection(_currentAlignment);
+                        });
+                      },
+                    ),
+                    QuillToolbarColorButton(
+                      controller: _controller,
+                      isBackground: false,
+                    ),
+                    Container(
+                      width: 60,
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      child: DropdownButton<double>(
+                        isDense: true,
+                        underline: SizedBox.shrink(),
+                        hint: const Text('16'),
+                        value: _currentFontSize,
+                        items: [12, 14, 16, 18, 20, 24, 28].map((size) {
+                          return DropdownMenuItem(
+                            value: size.toDouble(),
+                            child: Text(
+                              '$size',
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: (size) {
+                          if (size != null) {
+                            setState(() {
+                              _currentFontSize = size;
+                              _controller.formatSelection(
+                                Attribute.fromKeyValue('size', size.toString()),
+                              );
+                            });
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),

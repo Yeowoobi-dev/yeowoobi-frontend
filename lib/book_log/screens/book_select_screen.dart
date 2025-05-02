@@ -1,9 +1,11 @@
-import 'package:flutter/services.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter/material.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:yeowoobi_frontend/book_log/models/book.dart';
 import 'package:yeowoobi_frontend/book_log/services/book_service.dart';
 import 'package:yeowoobi_frontend/book_log/screens/book_write_screen.dart';
+import 'package:yeowoobi_frontend/book_log/screens/book_template_screen.dart';
 
 class BookSelectScreen extends StatefulWidget {
   const BookSelectScreen({super.key});
@@ -45,6 +47,17 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
 
   late Future<List<Book>> _bookFuture;
 
+  List<String> _templateNames = [];
+
+  Future<void> _loadTemplateNames() async {
+    final jsonString = await rootBundle.loadString('assets/template.json');
+    final List<dynamic> jsonList = json.decode(jsonString);
+    setState(() {
+      _templateNames =
+          jsonList.map((e) => e['name'] as String).take(4).toList();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -58,6 +71,7 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
         _filteredBooks = _filterBooks(_allBooks, _searchController.text);
       });
     });
+    _loadTemplateNames(); // 템플릿 이름 로딩
   }
 
   Future<void> _refreshBooks() async {
@@ -208,22 +222,99 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                 child: ElevatedButton(
                   onPressed: _selectedKeywords.isNotEmpty
                       ? () {
-                          Navigator.of(context).push(
-                            PageRouteBuilder(
-                              pageBuilder:
-                                  (context, animation, secondaryAnimation) =>
-                                      const BookWriteScreen(),
-                              transitionsBuilder: (context, animation,
-                                  secondaryAnimation, child) {
-                                final tween = Tween(
-                                        begin: const Offset(0, 1),
-                                        end: Offset.zero)
-                                    .chain(CurveTween(curve: Curves.ease));
-                                return SlideTransition(
-                                  position: animation.drive(tween),
-                                  child: child,
-                                );
-                              },
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16)),
+                              backgroundColor:
+                                  Theme.of(context).scaffoldBackgroundColor,
+                              contentPadding: const EdgeInsets.all(24),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Image.asset('assets/image/logo_orange.png',
+                                      height: 36),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    "독서록 템플릿을 골라주세요!",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 24),
+                                  SizedBox(height: 12),
+                                  ..._templateNames.map((tp) => Container(
+                                        width: double.infinity,
+                                        margin:
+                                            const EdgeInsets.only(bottom: 8),
+                                        child: ElevatedButton(
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.white,
+                                            foregroundColor: Colors.black,
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10)),
+                                            elevation: 1,
+                                          ),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                            Navigator.of(context).push(
+                                              PageRouteBuilder(
+                                                pageBuilder: (context,
+                                                        animation,
+                                                        secondaryAnimation) =>
+                                                    const BookWriteScreen(),
+                                                transitionsBuilder: (context,
+                                                    animation,
+                                                    secondaryAnimation,
+                                                    child) {
+                                                  final tween = Tween(
+                                                          begin: const Offset(
+                                                              0, 1),
+                                                          end: Offset.zero)
+                                                      .chain(CurveTween(
+                                                          curve: Curves.ease));
+                                                  return SlideTransition(
+                                                    position:
+                                                        animation.drive(tween),
+                                                    child: child,
+                                                  );
+                                                },
+                                              ),
+                                            );
+                                          },
+                                          child: Text(tp),
+                                        ),
+                                      )),
+                                  const SizedBox(height: 12),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const BookTemplateScreen()));
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(30)),
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 12),
+                                      ),
+                                      child: const Text('템플릿 수정'),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           );
                         }
