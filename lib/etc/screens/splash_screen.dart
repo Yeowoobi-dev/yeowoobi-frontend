@@ -13,7 +13,7 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     Future.delayed(Duration(seconds: 2), () {
-      // ✅ 2초 후 로그인 화면으로 이동
+      // 2초 후 로그인 화면으로 이동
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => LoginScreen()),
@@ -24,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context); // 현재 테마 가져오기
-    final bool isDarkMode = theme.brightness == Brightness.dark; // ✅ 다크 모드 확인
+    final bool isDarkMode = theme.brightness == Brightness.dark;
     final Color backgroundColor = isDarkMode
         ? CustomTheme.darkPrimaryColor // 다크 모드 배경색
         : CustomTheme.lightPrimaryColor; // 라이트 모드 배경색
