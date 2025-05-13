@@ -4,8 +4,8 @@
     "userId": "user_001",
     "name": "템플릿A",
     "contents": [
-      { "key": "인상깊은 구절\n" },
-      { "key": "나의 생각\n" }
+      { "insert": "인상깊은 구절\n" },
+      { "insert": "나의 생각\n" }
     ]
   },
   {
@@ -13,8 +13,8 @@
     "userId": "user_001",
     "name": "템플릿B",
     "contents": [
-      { "key": "줄거리 요약\n" },
-      { "key": "느낀 점\n" }
+      { "insert": "줄거리 요약\n" },
+      { "insert": "느낀 점\n" }
     ]
   },
   {
@@ -22,8 +22,8 @@
     "userId": "user_001",
     "name": "템플릿C",
     "contents": [
-      { "key": "좋았던 장면\n" },
-      { "key": "배운 점\n" }
+      { "insert": "좋았던 장면\n" },
+      { "insert": "배운 점\n" }
     ]
   },
   {
@@ -31,8 +31,8 @@
     "userId": "user_001",
     "name": "템플릿D",
     "contents": [
-      { "key": "책 속 한 문장\n" },
-      { "key": "왜 인상깊었는가\n" }
+      { "insert": "책 속 한 문장\n" },
+      { "insert": "왜 인상깊었는가\n" }
     ]
   }
 ]
