@@ -9,9 +9,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.8
-
+  flutter_quill: ^11.2.0
+  flutter_quill_extensions: ^11.0.0
+  path_provider: ^2.1.1
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -29,3 +31,4 @@ flutter:
      - assets/icons/
      - assets/dummy.json
      - assets/new.json
+     - assets/template.json

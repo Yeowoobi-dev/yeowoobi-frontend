@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:yeowoobi_frontend/book_log/models/book.dart';
 import 'package:yeowoobi_frontend/book_log/services/book_service.dart';
-import 'package:yeowoobi_frontend/book_log/screens/book_write_screen.dart';
+import 'package:yeowoobi_frontend/book_log/screens/book_select_screen.dart';
 
 class BookLogScreen extends StatefulWidget {
   const BookLogScreen({super.key});
@@ -227,7 +227,7 @@ class _BookLogScreenState extends State<BookLogScreen> {
             Navigator.of(context).push(
               PageRouteBuilder(
                 pageBuilder: (context, animation, secondaryAnimation) =>
-                    const BookWriteScreen(),
+                    const BookSelectScreen(),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) {
                   final tween =

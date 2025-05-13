@@ -1,0 +1,38 @@
+[
+  {
+    "id": "tpl_a",
+    "userId": "user_001",
+    "name": "템플릿A",
+    "contents": [
+      { "insert": "인상깊은 구절\n" },
+      { "insert": "나의 생각\n" }
+    ]
+  },
+  {
+    "id": "tpl_b",
+    "userId": "user_001",
+    "name": "템플릿B",
+    "contents": [
+      { "insert": "줄거리 요약\n" },
+      { "insert": "느낀 점\n" }
+    ]
+  },
+  {
+    "id": "tpl_c",
+    "userId": "user_001",
+    "name": "템플릿C",
+    "contents": [
+      { "insert": "좋았던 장면\n" },
+      { "insert": "배운 점\n" }
+    ]
+  },
+  {
+    "id": "tpl_d",
+    "userId": "user_001",
+    "name": "템플릿D",
+    "contents": [
+      { "insert": "책 속 한 문장\n" },
+      { "insert": "왜 인상깊었는가\n" }
+    ]
+  }
+]
