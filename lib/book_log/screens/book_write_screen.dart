@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:flutter_quill/quill_delta.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 
 class BookWriteScreen extends StatefulWidget {
-  const BookWriteScreen({super.key});
+  final List<String>? initialContents;
+  BookWriteScreen({required this.initialContents});
 
   @override
   _BookWriteScreenState createState() => _BookWriteScreenState();
@@ -22,7 +24,17 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = QuillController.basic();
+    if (widget.initialContents != null && widget.initialContents!.isNotEmpty) {
+      final delta = Delta()
+        ..insert(widget.initialContents!.join('\n\n'))
+        ..insert('\n');
+      _controller = QuillController(
+        document: Document.fromDelta(delta),
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    } else {
+      _controller = QuillController.basic();
+    }
     _titleController.addListener(() {
       setState(() {});
     });
@@ -265,4 +277,26 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
       ),
     );
   }
+}
+
+void navigateToBookWriteScreen(BuildContext context, Map<String, dynamic> tpl) {
+  Navigator.of(context).push(
+    PageRouteBuilder(
+      pageBuilder: (context, animation, secondaryAnimation) => BookWriteScreen(
+        initialContents: (tpl['contents'] as List<dynamic>)
+            .map((e) => (e as Map<String, dynamic>)['key']?.toString() ?? '')
+            .toList(),
+      ),
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final tween = Tween(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.ease));
+        return SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        );
+      },
+    ),
+  );
 }

@@ -47,14 +47,21 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
 
   late Future<List<Book>> _bookFuture;
 
-  List<String> _templateNames = [];
+  List<Map<String, dynamic>> _templates = [];
 
   Future<void> _loadTemplateNames() async {
     final jsonString = await rootBundle.loadString('assets/template.json');
     final List<dynamic> jsonList = json.decode(jsonString);
     setState(() {
-      _templateNames =
-          jsonList.map((e) => e['name'] as String).take(4).toList();
+      _templates = jsonList
+          .where((item) =>
+              item is Map<String, dynamic> &&
+              item['contents'] is List &&
+              (item['contents'] as List)
+                  .every((e) => e is Map<String, dynamic>))
+          .cast<Map<String, dynamic>>()
+          .take(4)
+          .toList();
     });
   }
 
@@ -245,7 +252,7 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                                   ),
                                   const SizedBox(height: 24),
                                   SizedBox(height: 12),
-                                  ..._templateNames.map((tp) => Container(
+                                  ..._templates.map((tpl) => Container(
                                         width: double.infinity,
                                         margin:
                                             const EdgeInsets.only(bottom: 8),
@@ -265,17 +272,27 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                                                 pageBuilder: (context,
                                                         animation,
                                                         secondaryAnimation) =>
-                                                    const BookWriteScreen(),
+                                                    BookWriteScreen(
+                                                  initialContents: (tpl[
+                                                              'contents']
+                                                          as List<dynamic>)
+                                                      .map((e) =>
+                                                          (e as Map<String,
+                                                                      dynamic>)[
+                                                                  'key']
+                                                              ?.toString() ??
+                                                          '')
+                                                      .toList(),
+                                                ),
                                                 transitionsBuilder: (context,
                                                     animation,
                                                     secondaryAnimation,
                                                     child) {
                                                   final tween = Tween(
-                                                          begin: const Offset(
-                                                              0, 1),
-                                                          end: Offset.zero)
-                                                      .chain(CurveTween(
-                                                          curve: Curves.ease));
+                                                    begin: const Offset(0, 1),
+                                                    end: Offset.zero,
+                                                  ).chain(CurveTween(
+                                                      curve: Curves.ease));
                                                   return SlideTransition(
                                                     position:
                                                         animation.drive(tween),
@@ -285,7 +302,7 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                                               ),
                                             );
                                           },
-                                          child: Text(tp),
+                                          child: Text(tpl['name']),
                                         ),
                                       )),
                                   const SizedBox(height: 12),
@@ -297,7 +314,7 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                                         Navigator.of(context).push(
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    const BookTemplateScreen()));
+                                                    const TemplateSelectScreen()));
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Theme.of(context)

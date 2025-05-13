@@ -9,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   cupertino_icons: ^1.0.8
   flutter_quill: ^11.2.0
   flutter_quill_extensions: ^11.0.0

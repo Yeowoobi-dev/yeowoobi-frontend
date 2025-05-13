@@ -3,24 +3,36 @@
     "id": "tpl_a",
     "userId": "user_001",
     "name": "템플릿A",
-    "contents": ["인상깊은 구절", "나의 생각"]
+    "contents": [
+      { "key": "인상깊은 구절\n" },
+      { "key": "나의 생각\n" }
+    ]
   },
   {
     "id": "tpl_b",
     "userId": "user_001",
     "name": "템플릿B",
-    "contents": ["줄거리 요약", "느낀 점"]
+    "contents": [
+      { "key": "줄거리 요약\n" },
+      { "key": "느낀 점\n" }
+    ]
   },
   {
     "id": "tpl_c",
     "userId": "user_001",
     "name": "템플릿C",
-    "contents": ["좋았던 장면", "배운 점"]
+    "contents": [
+      { "key": "좋았던 장면\n" },
+      { "key": "배운 점\n" }
+    ]
   },
   {
     "id": "tpl_d",
     "userId": "user_001",
     "name": "템플릿D",
-    "contents": ["책 속 한 문장", "왜 인상깊었는가"]
+    "contents": [
+      { "key": "책 속 한 문장\n" },
+      { "key": "왜 인상깊었는가\n" }
+    ]
   }
 ]
