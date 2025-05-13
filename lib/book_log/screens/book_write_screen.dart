@@ -86,8 +86,10 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    // TODO: Implement temp save logic here
-                                    Navigator.of(context).pop(); // 저장하고 나가기
+                                    // 임시 저장 로직 추가 필요
+                                    Navigator.of(context).pop(); // 닫기
+                                    Navigator.of(context).popUntil(
+                                        (route) => route.isFirst); // 홈화면으로 이동
                                   },
                                   child: const Text('임시저장'),
                                 ),
@@ -114,7 +116,9 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                     // 저장 버튼
                     icon: const Icon(Icons.save),
                     onPressed: () {
-                      // TODO: Implement save logic
+                      // 실제 저장 로직 추가 필요
+                      Navigator.of(context)
+                          .popUntil((route) => route.isFirst); // 홈화면으로 이동
                     },
                   ),
                 ],
@@ -284,7 +288,7 @@ void navigateToBookWriteScreen(BuildContext context, Map<String, dynamic> tpl) {
     PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => BookWriteScreen(
         initialContents: (tpl['contents'] as List<dynamic>)
-            .map((e) => (e as Map<String, dynamic>)['key']?.toString() ?? '')
+            .map((e) => (e as Map<String, dynamic>)['insert']?.toString() ?? '')
             .toList(),
       ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {

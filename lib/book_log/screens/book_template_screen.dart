@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
+import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
+
 import 'package:yeowoobi_frontend/book_log/models/template.dart';
 import 'package:yeowoobi_frontend/book_log/services/template_service.dart';
 import 'package:yeowoobi_frontend/book_log/screens/template_edit_screen.dart';
@@ -25,6 +27,7 @@ class _TemplateSelectScreenState extends State<TemplateSelectScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('템플릿 선택'),
+        backgroundColor: CustomTheme.backgroundColor(context),
       ),
       body: FutureBuilder<List<Template>>(
         future: _templatesFuture,
@@ -41,17 +44,48 @@ class _TemplateSelectScreenState extends State<TemplateSelectScreen> {
               itemCount: templates.length,
               itemBuilder: (context, index) {
                 final template = templates[index];
-                return ListTile(
-                  title: Text(template.name),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            TemplateEditScreen(template: template),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 8.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              TemplateEditScreen(template: template),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12.0),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 6,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
                       ),
-                    );
-                  },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            template.name,
+                            style: const TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Icon(Icons.arrow_forward_ios,
+                              size: 16.0, color: Colors.grey),
+                        ],
+                      ),
+                    ),
+                  ),
                 );
               },
             );
