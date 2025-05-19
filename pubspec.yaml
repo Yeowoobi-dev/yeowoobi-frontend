@@ -32,3 +32,5 @@ flutter:
      - assets/dummy.json
      - assets/new.json
      - assets/template.json
+     - lib/board/free_board_dummy.json
+     - lib/sns/sns_dummy.json

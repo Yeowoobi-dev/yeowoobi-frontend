@@ -1,0 +1,92 @@
+[
+    {
+      "id": "1",
+      "title": "가나다",
+      "author": "한강",
+      "imageUrl": "https://i.ibb.co/Pz1vDVHJ/1.jpg",
+      "publisher": "창비",
+      "created_date": "2025-04-03T00:00:00",
+      "updated_date": "2025-04-03T00:00:00"
+    },
+    {
+      "id": "2",
+      "title": "라마",
+      "author": "김훈",
+      "imageUrl": "https://i.ibb.co/whKMzhwg/2.png",
+      "publisher": "창비",
+      "created_date": "2025-04-03T00:00:00",
+      "updated_date": "2025-04-03T00:00:00"
+    },
+    {
+      "id": "3",
+      "title": "바사아",
+      "author": "김초엽",
+      "imageUrl": "https://i.ibb.co/0yg7QHg2/3.jpg",
+      "publisher": "창비",
+      "created_date": "2025-04-03T00:00:00",
+      "updated_date": "2025-04-03T00:00:00"
+    },
+    {
+      "id": "4",
+      "title": "자차",
+      "author": "김초엽2",
+      "imageUrl": "https://i.ibb.co/0yg7QHg2/3.jpg",
+      "publisher": "창비",
+      "created_date": "2025-04-03T00:00:00",
+      "updated_date": "2025-04-03T00:00:00"
+    },
+    {
+      "id": "5",
+      "title": "카",
+      "author": "김초엽3",
+      "imageUrl": "https://i.ibb.co/0yg7QHg2/3.jpg",
+      "publisher": "창비",
+      "created_date": "2025-04-03T00:00:00",
+      "updated_date": "2025-04-03T00:00:00"
+    },
+    {
+      "id": "6",
+      "title": "타파",
+      "author": "한강",
+      "imageUrl": "https://i.ibb.co/Pz1vDVHJ/1.jpg",
+      "publisher": "창비",
+      "created_date": "2025-04-03T00:00:00",
+      "updated_date": "2025-04-03T00:00:00"
+    },
+    {
+      "id": "7",
+      "title": "하가나",
+      "author": "김훈",
+      "imageUrl": "https://i.ibb.co/whKMzhwg/2.png",
+      "publisher": "창비",
+      "created_date": "2025-04-03T00:00:00",
+      "updated_date": "2025-04-03T00:00:00"
+    },
+    {
+      "id": "8",
+      "title": "다라마바",
+      "author": "김초엽",
+      "imageUrl": "https://i.ibb.co/0yg7QHg2/3.jpg",
+      "publisher": "창비",
+      "created_date": "2025-04-03T00:00:00",
+      "updated_date": "2025-04-03T00:00:00"
+    },
+    {
+      "id": "9",
+      "title": "사아자차카",
+      "author": "김초엽2",
+      "imageUrl": "https://i.ibb.co/0yg7QHg2/3.jpg",
+      "publisher": "창비",
+      "created_date": "2025-04-03T00:00:00",
+      "updated_date": "2025-04-03T00:00:00"
+    },
+    {
+      "id": "10",
+      "title": "타파하",
+      "author": "김초엽3",
+      "imageUrl": "https://i.ibb.co/0yg7QHg2/3.jpg",
+      "publisher": "창비",
+      "created_date": "2025-04-03T00:00:00",
+      "updated_date": "2025-04-03T00:00:00"
+    }
+]

@@ -1,0 +1,35 @@
+[
+  {
+    "bookTitle": "책 먹는 여우",
+    "title": "책 먹는 여우의 맛집리스트가 궁금하다.",
+    "uploader": "맛집러버",
+    "time": "6시간 전",
+    "likes": 12,
+    "comments": 6,
+    "feedImage": "assets/image/fox.png",
+    "coverImage": "assets/image/fox.png",
+    "review": "이 책을 보니까 나도 책을 먹고 싶어졌다."
+  },
+  {
+    "bookTitle": "어린 왕자",
+    "title": "여우와 장미가 생각나는 카페를 찾았어요.",
+    "uploader": "감성충전러",
+    "time": "1일 전",
+    "likes": 23,
+    "comments": 8,
+    "feedImage": "assets/image/fox.png",
+    "coverImage": "assets/image/fox.png",
+    "review": "가장 중요한 건 눈에 보이지 않아. 그래서 더 소중해."
+  },
+  {
+    "bookTitle": "해리 포터",
+    "title": "호그와트 분위기 나는 레스토랑 추천!",
+    "uploader": "해덕러버",
+    "time": "3일 전",
+    "likes": 45,
+    "comments": 14,
+    "feedImage": "assets/image/fox.png",
+    "coverImage": "assets/image/fox.png",
+    "review": "행복한 사람은 가장 강한 사람이다."
+  }
+]
