@@ -1,5 +1,3 @@
-// 홈 화면
-
 import 'package:flutter/material.dart';
 import 'package:yeowoobi_frontend/widgets/bottom_nav_bar.dart';
 import 'package:yeowoobi_frontend/book_log/screens/book_log_screen.dart';
@@ -18,13 +16,20 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    BookLogScreen(),
-    SnsScreen(),
-    BoardScreen(),
-    SettingsScreen(),
+    const BookLogScreen(),
+    const SnsScreen(),
+    const BoardScreen(),
+    Container(), // SettingsScreen은 Navigator로 띄움
   ];
 
   void _onItemTapped(int index) {
+    if (index == 3) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SettingsScreen()),
+      );
+      return;
+    }
     setState(() {
       _selectedIndex = index;
     });
@@ -34,7 +39,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: IndexedStack(
-        // ✅ IndexedStack으로 변경하여 상태 유지
         index: _selectedIndex,
         children: _screens,
       ),
