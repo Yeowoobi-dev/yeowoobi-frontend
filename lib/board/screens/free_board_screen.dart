@@ -23,7 +23,7 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
 
   final String _apiUrl = 'http://43.202.170.189:3000/community/posts';
   final String _token =
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0NzYzNzc4OCwiZXhwIjoxNzQ3NjQxMzg4fQ.i5G949cDRhPe6CLDVvx80xRWgR1XCgpy1tvEgCtu3LI'; // 전체 토큰으로 교체
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0NzcyMzE0MiwiZXhwIjoxNzQ3NzI2NzQyfQ.TKZy52YHlxL8qxarwxxYohDSAL8sxYtpitwuUnLQrx4'; // 전체 토큰으로 교체
 
   @override
   void initState() {

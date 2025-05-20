@@ -21,7 +21,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
 
   List<dynamic> comments = [];
   final String _token =
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0NzYzNzc4OCwiZXhwIjoxNzQ3NjQxMzg4fQ.i5G949cDRhPe6CLDVvx80xRWgR1XCgpy1tvEgCtu3LI';
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0NzcyMzE0MiwiZXhwIjoxNzQ3NzI2NzQyfQ.TKZy52YHlxL8qxarwxxYohDSAL8sxYtpitwuUnLQrx4';
 
   @override
   void initState() {
