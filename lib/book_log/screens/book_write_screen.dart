@@ -1,8 +1,12 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path/path.dart' as p;
+import 'dart:convert';
 
 class BookWriteScreen extends StatefulWidget {
   final List<String>? initialContents;
@@ -20,6 +24,8 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
   double? _currentFontSize;
   Attribute<dynamic> _currentAlignment = Attribute.leftAlignment;
   IconData _currentAlignmentIcon = Icons.format_align_left;
+  String? _selectedBackground;
+  List<String> _backgroundOptions = [];
 
   @override
   void initState() {
@@ -38,8 +44,22 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
     _titleController.addListener(() {
       setState(() {});
     });
+    _loadBackgroundOptions();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_editorFocusNode);
+    });
+  }
+
+  Future<void> _loadBackgroundOptions() async {
+    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+    final backgrounds = manifestMap.keys
+        .where((key) =>
+            key.startsWith('assets/background/') && p.extension(key) == '.png')
+        .toList();
+    setState(() {
+      _backgroundOptions = ['없음', ...backgrounds];
+      _selectedBackground = null;
     });
   }
 
@@ -126,42 +146,55 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
             ),
             // 제목 입력 및 에디터 영역
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      child: TextField(
-                        controller: _titleController,
-                        decoration: InputDecoration(
-                          hintText: '제목을 입력하세요!',
-                          border: InputBorder.none,
-                          hintStyle: TextStyle(
-                            color: CustomTheme.neutral200,
+              child: Container(
+                width: double.infinity,
+                decoration: _selectedBackground != null
+                    ? BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage(_selectedBackground!),
+                          fit: BoxFit.fitWidth,
+                          repeat: ImageRepeat.repeatY,
+                          alignment: Alignment.topCenter,
+                        ),
+                      )
+                    : null,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: TextField(
+                          controller: _titleController,
+                          decoration: InputDecoration(
+                            hintText: '제목을 입력하세요!',
+                            border: InputBorder.none,
+                            hintStyle: TextStyle(
+                              color: CustomTheme.neutral200,
+                              fontSize: 20,
+                            ),
+                          ),
+                          style: const TextStyle(
                             fontSize: 20,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Divider(
+                            thickness: 0.5, color: CustomTheme.neutral200),
+                      ),
+                      QuillEditor(
+                        focusNode: _editorFocusNode,
+                        scrollController: _editorScrollController,
+                        controller: _controller,
+                        config: QuillEditorConfig(
+                          padding: const EdgeInsets.all(18),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Divider(
-                          thickness: 0.5, color: CustomTheme.neutral200),
-                    ),
-                    QuillEditor(
-                      focusNode: _editorFocusNode,
-                      scrollController: _editorScrollController,
-                      controller: _controller,
-                      config: QuillEditorConfig(
-                        padding: const EdgeInsets.all(18), // 좌우 여백
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -212,13 +245,6 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                       controller: _controller,
                       attribute: Attribute.blockQuote,
                     ),
-                    /*QuillToolbarSelectHeaderStyleDropdownButton(
-                      // 헤더 스타일
-                      controller: _controller,
-                    ),*/
-                    /*QuillToolbarSelectAlignmentButton(
-                      controller: _controller,
-                    ),*/
                     IconButton(
                       // 정렬
                       icon: Icon(_currentAlignmentIcon),
@@ -242,6 +268,49 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                     QuillToolbarColorButton(
                       controller: _controller,
                       isBackground: false,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(
+                        children: [
+                          const Text("배경지"),
+                          const SizedBox(width: 4),
+                          DropdownButton<String>(
+                            value: _selectedBackground,
+                            underline: SizedBox.shrink(),
+                            items: _backgroundOptions.map((path) {
+                              return DropdownMenuItem(
+                                value: path == '없음' ? null : path,
+                                child: path == '없음'
+                                    ? const Text('없음')
+                                    : Container(
+                                        width: 24,
+                                        height: 24,
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            image: AssetImage(path),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          border: Border.all(
+                                              color: Colors.grey.shade300),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                      ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedBackground = value;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    QuillToolbarSelectHeaderStyleDropdownButton(
+                      // 헤더 스타일
+                      controller: _controller,
                     ),
                     Container(
                       width: 60,
