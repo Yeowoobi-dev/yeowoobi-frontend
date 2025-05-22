@@ -3,7 +3,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
-import 'package:yeowoobi_frontend/etc/screens/splash_screen.dart';
 
 void main() {
   runApp(const MyApp());

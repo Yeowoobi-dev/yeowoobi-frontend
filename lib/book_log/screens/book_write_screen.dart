@@ -6,7 +6,7 @@ import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 
 class BookWriteScreen extends StatefulWidget {
   final List<String>? initialContents;
-  BookWriteScreen({required this.initialContents});
+  const BookWriteScreen({super.key, required this.initialContents});
 
   @override
   _BookWriteScreenState createState() => _BookWriteScreenState();
