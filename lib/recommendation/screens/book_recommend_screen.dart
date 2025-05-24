@@ -1,5 +1,4 @@
-// 임시 방꾸미기 화면
-
+import 'package:yeowoobi_frontend/recommendation/screens/book_question_screen.dart';
 import 'package:flutter/material.dart';
 
 class BookRecommendScreen extends StatelessWidget {
@@ -10,7 +9,7 @@ class BookRecommendScreen extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back_ios),
             onPressed: () => Navigator.of(context).pop(),
           ),
           elevation: 0,
@@ -56,7 +55,10 @@ class BookRecommendScreen extends StatelessWidget {
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      // TODO: Add navigation or logic
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                            builder: (context) => BookQuestionScreen()),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,

@@ -35,5 +35,6 @@ flutter:
      - assets/template.json
      - assets/image/q1.png
      - assets/image/q2.png
+     - assets/questions.json
      - lib/board/free_board_dummy.json
      - lib/sns/sns_dummy.json
