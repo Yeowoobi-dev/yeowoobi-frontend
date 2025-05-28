@@ -28,13 +28,15 @@ flutter:
      - assets/image/logo_orange.png
      - assets/image/kakao_login_large_wide.png
      - assets/image/fox.png
+     - assets/image/q1.png
+     - assets/image/q2.png
      - assets/icons/
+     - assets/yeowoong/yeowoong1.png
      - assets/background/
+     
      - assets/dummy.json
      - assets/new.json
      - assets/template.json
-     - assets/image/q1.png
-     - assets/image/q2.png
      - assets/questions.json
      - lib/board/free_board_dummy.json
      - lib/sns/sns_dummy.json
