@@ -101,7 +101,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                 style: const TextStyle(fontSize: 16),
                               ),
                               const SizedBox(height: 8),
-                              const Row(
+                              /*const Row( // 별점 및 출판사 숨기기
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.star,
@@ -109,7 +109,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                   SizedBox(width: 4),
                                   Text("4.5 출판사 | 창비"),
                                 ],
-                              ),
+                              ),*/
                               const SizedBox(height: 16),
                               const Text(
                                 "“억압된 일상에서 벗어나려는 여자의 극단적 선택으로\n인간 내면의 욕망과 폭력을 날카롭게 그려낸 소설.”",
@@ -117,15 +117,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                 style: TextStyle(
                                     color: Colors.black54, height: 1.4),
                               ),
-                              const SizedBox(height: 16),
-                              Wrap(
-                                spacing: 8,
-                                children: [
-                                  Chip(label: Text("현대문학")),
-                                  Chip(label: Text("소설")),
-                                  Chip(label: Text("심리 공포")),
-                                ],
-                              ),
+                              const SizedBox(height: 16)
                             ],
                           ),
                         ),
@@ -133,7 +125,7 @@ class _ResultScreenState extends State<ResultScreen> {
                         Container(
                           margin: const EdgeInsets.only(bottom: 32.0),
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 24.0, vertical: 16.0),
+                              horizontal: 20.0, vertical: 20.0),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFFE3C4),
                             borderRadius: BorderRadius.circular(40),
@@ -146,11 +138,17 @@ class _ResultScreenState extends State<ResultScreen> {
                             ],
                           ),
                           // 추천 이유
-                          child: Row(
+                          child: Stack(
                             children: [
-                              //Image.asset('assets/icons/fox.png', width: 36),
-                              const SizedBox(width: 12),
-                              Expanded(
+                              Positioned(
+                                top: 10,
+                                left: 0,
+                                child: Image.asset('assets/image/mini.png',
+                                    width: 36),
+                              ),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 48.0, top: 8.0),
                                 child: Text(
                                   "내가 이 책을 추천한 이유는, 이 책이 억압된 일상 속에서 벗어나려는 한 여성의 심리를 섬세하게 그려낸 내용을 담고 있고, 불편할 만큼 강렬한 분위기와 상징적인 서사가 인상적인 특징이 있어서 네가 좋아할 것 같기 때문이야!",
                                   style: const TextStyle(height: 1.4),
@@ -173,24 +171,29 @@ class _ResultScreenState extends State<ResultScreen> {
             bottom: 24,
             left: 24,
             right: 24,
-            child: ElevatedButton(
-              onPressed: _loadRandomBook,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: CustomTheme.lightPrimaryColor,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton(
+                  onPressed: _loadRandomBook,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CustomTheme.lightPrimaryColor,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 32, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    "다른 책 추천받기",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
-              ),
-              child: const Text(
-                "다른 책 추천받기",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+              ],
             ),
           ),
         ],

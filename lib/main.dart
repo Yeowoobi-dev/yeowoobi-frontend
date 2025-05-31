@@ -15,8 +15,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Yeowoobi',
       theme: CustomTheme.lightTheme, // 라이트 테마
+      title: 'Yeowoobi',
       darkTheme: CustomTheme.darkTheme, // 다크 테마
       themeMode: ThemeMode.system, // 시스템 설정 따라
       localizationsDelegates: const [

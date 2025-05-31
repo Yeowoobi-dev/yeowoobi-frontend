@@ -1,25 +1,32 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:yeowoobi_frontend/recommendation/screens/loading_screen.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
-import 'package:yeowoobi_frontend/recommendation/screens/result_screen.dart';
 
-class BookQuestionScreen extends StatefulWidget {
-  const BookQuestionScreen({super.key});
+class QuestionScreen extends StatefulWidget {
+  const QuestionScreen({super.key});
 
   @override
-  State<BookQuestionScreen> createState() => _BookQuestionScreenState();
+  State<QuestionScreen> createState() => _BookQuestionScreenState();
 }
 
-class _BookQuestionScreenState extends State<BookQuestionScreen> {
+class _BookQuestionScreenState extends State<QuestionScreen> {
   List<dynamic> _questions = [];
   int _currentIndex = 0;
   List<String> _answers = [];
+  int _selectedIndex = -1;
 
   @override
   void initState() {
     super.initState();
     _loadQuestions();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   Future<void> _loadQuestions() async {
@@ -29,20 +36,27 @@ class _BookQuestionScreenState extends State<BookQuestionScreen> {
     });
   }
 
-  void _selectAnswer(String answer) {
+  void _selectAnswer(String answer, int index) {
     setState(() {
-      _answers.add(answer);
+      _selectedIndex = index;
     });
 
-    if (_currentIndex < _questions.length - 1) {
+    Future.delayed(const Duration(milliseconds: 300), () {
       setState(() {
-        _currentIndex++;
+        _answers.add(answer);
       });
-    } else {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => ResultScreen()),
-      );
-    }
+
+      if (_currentIndex < _questions.length - 1) {
+        setState(() {
+          _currentIndex++;
+          _selectedIndex = -1;
+        });
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => LoadingScreen()),
+        );
+      }
+    });
   }
 
   @override
@@ -62,7 +76,6 @@ class _BookQuestionScreenState extends State<BookQuestionScreen> {
       backgroundColor: CustomTheme.backgroundColor(context),
       appBar: AppBar(
         backgroundColor: CustomTheme.backgroundColor(context),
-        elevation: 0,
         toolbarHeight: 60,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios),
@@ -78,17 +91,16 @@ class _BookQuestionScreenState extends State<BookQuestionScreen> {
           },
         ),
       ),
-      body: SingleChildScrollView(
+      body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 18.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                //질문
-                margin: const EdgeInsets.only(bottom: 32.0),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 24.0, vertical: 16.0),
+                height: 140,
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: const Color(0xFFFFE3C4),
                   borderRadius: BorderRadius.circular(40),
@@ -101,28 +113,35 @@ class _BookQuestionScreenState extends State<BookQuestionScreen> {
                   ],
                 ),
                 child: Text(
-                  question['question'], // 질문 텍스트
-                  style: TextStyle(
-                    fontSize: 16,
+                  question['question'],
+                  style: const TextStyle(
+                    fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: Colors.brown,
                   ),
+                  textAlign: TextAlign.center,
                 ),
               ),
-              Image.asset('assets/image/q1.png', height: 300),
-              SizedBox(height: 24),
-              // 선택지 버튼
+              SizedBox(
+                height: 280,
+                child: Image.asset(question['image']),
+              ),
+              const SizedBox(height: 24),
               ...List.generate(4, (index) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 15.0),
                   child: GestureDetector(
-                    onTap: () => _selectAnswer(question['options'][index]),
-                    child: Container(
+                    onTap: () =>
+                        _selectAnswer(question['options'][index], index),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOut,
                       width: double.infinity,
+                      height: 56,
                       padding: const EdgeInsets.symmetric(
                           vertical: 16, horizontal: 20),
                       decoration: BoxDecoration(
-                        color: Color(0xFFDED8D2),
+                        color: CustomTheme.neutral100,
                         borderRadius: BorderRadius.circular(15),
                         boxShadow: const [
                           BoxShadow(

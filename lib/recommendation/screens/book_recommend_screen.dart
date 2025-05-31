@@ -1,4 +1,4 @@
-import 'package:yeowoobi_frontend/recommendation/screens/book_question_screen.dart';
+import 'package:yeowoobi_frontend/recommendation/screens/question_screen.dart';
 import 'package:flutter/material.dart';
 
 class BookRecommendScreen extends StatelessWidget {
@@ -17,7 +17,7 @@ class BookRecommendScreen extends StatelessWidget {
           foregroundColor: Colors.black,
         ),
         body: Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 24.0),
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -26,7 +26,7 @@ class BookRecommendScreen extends StatelessWidget {
                 Container(
                   margin: const EdgeInsets.only(bottom: 32.0),
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 24.0, vertical: 16.0),
+                      horizontal: 40.0, vertical: 30.0),
                   decoration: BoxDecoration(
                     color: Color(0xFFFFE3C4), // 연한 주황색 배경
                     borderRadius: BorderRadius.circular(40),
@@ -41,14 +41,14 @@ class BookRecommendScreen extends StatelessWidget {
                   child: const Text(
                     "안녕! 난 여웅이야\n너에게 딱 맞는 책을 추천해줄게",
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 20,
                       fontWeight: FontWeight.w600,
                       color: Colors.brown,
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
-                Image.asset('assets/image/q1.png', height: 380),
+                Image.asset('assets/image/yeowoong1.png', height: 460),
                 const SizedBox(height: 60),
                 SizedBox(
                   width: 200,
@@ -57,7 +57,7 @@ class BookRecommendScreen extends StatelessWidget {
                     onPressed: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                            builder: (context) => BookQuestionScreen()),
+                            builder: (context) => QuestionScreen()),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -65,6 +65,7 @@ class BookRecommendScreen extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
+                      animationDuration: Duration.zero, // Disable animation
                     ),
                     child: const Text(
                       "시작하기",
