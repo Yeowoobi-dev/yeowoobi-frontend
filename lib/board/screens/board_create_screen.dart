@@ -16,7 +16,7 @@ class _BoardCreateScreenState extends State<BoardCreateScreen> {
   bool _isAnonymous = true;
 
   final String _apiUrl = 'http://43.202.170.189:3000/community/posts';
-  final String _token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODY2Nzk3NywiZXhwIjoxNzQ4NjcxNTc3fQ.4zImnvne7m_BNdL0RXDu949w1T1ArKx6TcbaxZGEvls';
+  final String _token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODY3MjY4NiwiZXhwIjoxNzUxMjY0Njg2fQ.1AZtrbziIH_MJ1upgJ1wAi0K5Zxdf32l7p9GQIaza3Q';
 
   @override
   void dispose() {

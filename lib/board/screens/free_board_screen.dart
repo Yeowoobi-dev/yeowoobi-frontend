@@ -1,3 +1,4 @@
+// free_board_screen.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -23,7 +24,7 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
 
   final String _apiUrl = 'http://43.202.170.189:3000/community/posts';
   final String _token =
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODY2Nzk3NywiZXhwIjoxNzQ4NjcxNTc3fQ.4zImnvne7m_BNdL0RXDu949w1T1ArKx6TcbaxZGEvls';
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODY3MjY4NiwiZXhwIjoxNzUxMjY0Njg2fQ.1AZtrbziIH_MJ1upgJ1wAi0K5Zxdf32l7p9GQIaza3Q';
 
   @override
   void initState() {
@@ -92,16 +93,14 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
     });
   }
 
+  Color _likeColor() {
+    return CustomTheme.neutral400; // ✅ 항상 고정된 검정색
+  }
+
   @override
   void dispose() {
     _controller.dispose();
     super.dispose();
-  }
-
-  Color _likeColor(Map<String, dynamic> post) {
-    return (post['isLiked'] ?? false)
-        ? Theme.of(context).colorScheme.primary  // ✅ 오류 수정: 여기
-        : CustomTheme.neutral300;
   }
 
   @override
@@ -198,8 +197,20 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
                               builder: (_) => BoardDetailScreen(post: post),
                             ),
                           );
-                          if (result == true) {
-                            await _loadPosts(); // ✨ 돌아오면 새로고침
+                          if (result != null) {
+                            if (result is Map && result['deletedPostId'] != null) {
+                              setState(() {
+                                posts.removeWhere((p) => p['id'] == result['deletedPostId']);
+                              });
+                            } else if (result is Map) {
+                              setState(() {
+                                posts[index]['commentsCount'] = result['commentsCount'];
+                                posts[index]['likesCount'] = result['likesCount'];
+                                posts[index]['isLiked'] = result['isLiked'];
+                              });
+                            } else {
+                              await _loadPosts();
+                            }
                           }
                         },
                         child: Row(
@@ -241,13 +252,13 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
                                       Image.asset(
                                         'assets/icons/heart.png',
                                         width: 18,
-                                        color: _likeColor(post),
+                                        color: _likeColor(), // ✅ 고정된 색
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
                                         '${post['likesCount']}',
                                         style: TextStyle(
-                                          color: _likeColor(post),
+                                          color: _likeColor(), // ✅ 고정된 색
                                         ),
                                       ),
                                       const SizedBox(width: 12),
@@ -283,7 +294,7 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
                   builder: (_) => const BoardCreateScreen(),
                 ),
               );
-              _loadPosts(); // 작성 후 다시 불러오기
+              _loadPosts();
             },
             child: AnimatedScale(
               scale: 1.0,

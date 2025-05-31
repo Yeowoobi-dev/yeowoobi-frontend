@@ -1,28 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 
-class CommentTile extends StatefulWidget {
+class CommentTile extends StatelessWidget {
   final Map<String, dynamic> comment;
   final String currentUserId;
-  final Function(Map<String, dynamic>) onReply;
-  final Function(int) onDelete;
-  final Function(int) onLike; // ✅ 추가
+  final Map<String, dynamic>? replyTarget;
+  final Future<void> Function(Map<String, dynamic>) onReply;
+  final Future<void> Function(int) onLike;
+  final Future<void> Function(int) onDelete;
 
   const CommentTile({
     super.key,
     required this.comment,
     required this.currentUserId,
+    required this.replyTarget,
     required this.onReply,
-    required this.onDelete,
     required this.onLike,
+    required this.onDelete,
   });
-
-  @override
-  State<CommentTile> createState() => _CommentTileState();
-}
-
-class _CommentTileState extends State<CommentTile> {
-  bool showReplies = false;
 
   String _format(String isoTime) {
     final date = DateTime.parse(isoTime);
@@ -31,140 +26,186 @@ class _CommentTileState extends State<CommentTile> {
 
   @override
   Widget build(BuildContext context) {
-    final comment = widget.comment;
-    final replies = comment['children'] ?? [];
-    final isMine = comment['userId'] == widget.currentUserId;
-    final likes = comment['likesCount'] ?? 0;
+    final isMine = comment['userId'] == currentUserId;
     final isLiked = comment['isLiked'] ?? false;
+    final likesCount = comment['likesCount'] ?? 0;
+    final replies = comment['children'] ?? [];
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            const CircleAvatar(radius: 14, backgroundColor: CustomTheme.neutral200),
-            const SizedBox(width: 10),
-            const Text('익명', style: TextStyle(fontSize: 16)),
-            const Spacer(),
-            Text(_format(comment['createdAt']),
-                style: const TextStyle(fontSize: 14, color: CustomTheme.neutral300)),
-          ]),
+          // 댓글 (상위)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const CircleAvatar(radius: 14, backgroundColor: CustomTheme.neutral200),
+              const SizedBox(width: 10),
+              const Text('익명', style: TextStyle(fontSize: 16)),
+              const Spacer(),
+              Text(
+                _format(comment['createdAt']),
+                style: const TextStyle(fontSize: 14, color: CustomTheme.neutral300),
+              ),
+            ],
+          ),
           const SizedBox(height: 8),
           Text(comment['content'], style: const TextStyle(fontSize: 16)),
           const SizedBox(height: 8),
-          Row(children: [
-            GestureDetector(
-              onTap: () => widget.onLike(comment['id']),
-              child: Row(children: [
-                Image.asset(
-                  'assets/icons/heart.png',
-                  width: 18,
-                  color: isLiked ? Theme.of(context).colorScheme.primary : CustomTheme.neutral300,
-                ),
-                const SizedBox(width: 4),
-                if (likes > 0)
-                  Text('$likes', style: TextStyle(
-                    fontSize: 14,
-                    color: isLiked ? Theme.of(context).colorScheme.primary : CustomTheme.neutral300,
-                  )),
-              ]),
-            ),
-            const SizedBox(width: 16),
-            GestureDetector(
-              onTap: () => widget.onReply(comment),
-              child: Row(children: [
-                Image.asset('assets/icons/chat.png', width: 18),
-                const SizedBox(width: 4),
-                const Text('답글', style: TextStyle(fontSize: 14)),
-              ]),
-            ),
-            const SizedBox(width: 16),
-            if (isMine)
+          Row(
+            children: [
               GestureDetector(
-                onTap: () => widget.onDelete(comment['id']),
-                child: Row(children: [
-                  Image.asset('assets/icons/delete.png', width: 18),
-                  const SizedBox(width: 4),
-                  const Text('삭제', style: TextStyle(fontSize: 14)),
-                ]),
-              ),
-          ]),
-          if (replies.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: GestureDetector(
-                onTap: () => setState(() => showReplies = !showReplies),
-                child: Text(
-                  showReplies ? '답글 숨기기' : '답글 ${replies.length}개 보기',
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                onTap: () async {
+                  await onLike(comment['id']);
+                },
+                child: Row(
+                  children: [
+                    Image.asset(
+                      'assets/icons/heart.png',
+                      width: 18,
+                      color: isLiked
+                          ? Theme.of(context).colorScheme.primary
+                          : CustomTheme.neutral300,
+                    ),
+                    const SizedBox(width: 4),
+                    SizedBox(
+                      width: 20,
+                      child: likesCount > 0
+                          ? Text(
+                        '$likesCount',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: isLiked
+                              ? Theme.of(context).colorScheme.primary
+                              : CustomTheme.neutral300,
+                        ),
+                        textAlign: TextAlign.center,
+                      )
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
                 ),
               ),
-            ),
-          if (showReplies)
-            ...replies.map<Widget>((reply) {
-              final replyLikes = reply['likesCount'] ?? 0;
-              final isReplyMine = reply['userId'] == widget.currentUserId;
-              final isReplyLiked = reply['isLiked'] ?? false;
-              return Padding(
-                padding: const EdgeInsets.only(left: 24, top: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(width: 16),
+              GestureDetector(
+                onTap: () => onReply(comment),
+                child: Row(
                   children: [
-                    Row(children: [
-                      const Icon(Icons.subdirectory_arrow_right, size: 16, color: CustomTheme.neutral300),
+                    Image.asset('assets/icons/chat.png', width: 18),
+                    const SizedBox(width: 4),
+                    Text(
+                      '답글',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: replyTarget?['id'] == comment['id']
+                            ? Theme.of(context).colorScheme.primary
+                            : Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              if (isMine)
+                GestureDetector(
+                  onTap: () async {
+                    await onDelete(comment['id']);
+                  },
+                  child: Row(
+                    children: [
+                      Image.asset('assets/icons/delete.png', width: 18),
+                      const SizedBox(width: 4),
+                      const Text('삭제', style: TextStyle(fontSize: 14)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // 답글
+          ...replies.map<Widget>((reply) {
+            final isReplyMine = reply['userId'] == currentUserId;
+            final replyLiked = reply['isLiked'] ?? false;
+            final replyLikesCount = reply['likesCount'] ?? 0;
+            return Padding(
+              padding: const EdgeInsets.only(left: 24, bottom: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.subdirectory_arrow_right,
+                          size: 16, color: CustomTheme.neutral300),
                       const SizedBox(width: 6),
-                      const Text('익명', style: TextStyle(fontSize: 15)),
+                      const CircleAvatar(radius: 14, backgroundColor: CustomTheme.neutral200),
+                      const SizedBox(width: 10),
+                      const Text('익명', style: TextStyle(fontSize: 16)),
                       const Spacer(),
                       Text(
                         _format(reply['createdAt']),
                         style: const TextStyle(fontSize: 13, color: CustomTheme.neutral300),
                       ),
-                    ]),
-                    const SizedBox(height: 4),
-                    Text(reply['content'], style: const TextStyle(fontSize: 15)),
-                    const SizedBox(height: 4),
-                    Row(children: [
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(reply['content'], style: const TextStyle(fontSize: 15)),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
                       GestureDetector(
-                        onTap: () => widget.onLike(reply['id']),
-                        child: Row(children: [
-                          Image.asset(
-                            'assets/icons/heart.png',
-                            width: 16,
-                            color: isReplyLiked ? Theme.of(context).colorScheme.primary : CustomTheme.neutral300,
-                          ),
-                          const SizedBox(width: 4),
-                          if (replyLikes > 0)
-                            Text('$replyLikes', style: TextStyle(
-                              fontSize: 13,
-                              color: isReplyLiked ? Theme.of(context).colorScheme.primary : CustomTheme.neutral300,
-                            )),
-                        ]),
-                      ),
-                      const SizedBox(width: 16),
-                      GestureDetector(
-                        onTap: () => widget.onReply(reply),
-                        child: Row(children: [
-                          Image.asset('assets/icons/chat.png', width: 16),
-                          const SizedBox(width: 4),
-                          const Text('답글', style: TextStyle(fontSize: 13)),
-                        ]),
+                        onTap: () async {
+                          await onLike(reply['id']);
+                        },
+                        child: Row(
+                          children: [
+                            Image.asset(
+                              'assets/icons/heart.png',
+                              width: 16,
+                              color: replyLiked
+                                  ? Theme.of(context).colorScheme.primary
+                                  : CustomTheme.neutral300,
+                            ),
+                            const SizedBox(width: 4),
+                            SizedBox(
+                              width: 20,
+                              child: replyLikesCount > 0
+                                  ? Text(
+                                '$replyLikesCount',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: replyLiked
+                                      ? Theme.of(context).colorScheme.primary
+                                      : CustomTheme.neutral300,
+                                ),
+                                textAlign: TextAlign.center,
+                              )
+                                  : const SizedBox.shrink(),
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(width: 16),
                       if (isReplyMine)
                         GestureDetector(
-                          onTap: () => widget.onDelete(reply['id']),
-                          child: Row(children: [
-                            Image.asset('assets/icons/delete.png', width: 16),
-                            const SizedBox(width: 4),
-                            const Text('삭제', style: TextStyle(fontSize: 13)),
-                          ]),
+                          onTap: () async {
+                            await onDelete(reply['id']);
+                          },
+                          child: Row(
+                            children: [
+                              Image.asset('assets/icons/delete.png', width: 16),
+                              const SizedBox(width: 4),
+                              const Text('삭제', style: TextStyle(fontSize: 13)),
+                            ],
+                          ),
                         ),
-                    ]),
-                  ],
-                ),
-              );
-            }).toList()
+                    ],
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
         ],
       ),
     );
