@@ -2,37 +2,48 @@
   {
     "id": "tpl_a",
     "userId": "user_001",
-    "name": "템플릿A",
+    "name": "소설 템플릿",
     "contents": [
-      { "insert": "인상깊은 구절\n" },
-      { "insert": "나의 생각\n" }
+      { "insert": "주요 등장인물 소개\n", "attributes": { "bold": true } },
+      { "insert": "줄거리 요약\n", "attributes": { "bold": true } },
+      { "insert": "인상 깊었던 장면\n", "attributes": { "bold": true } },
+      { "insert": "나의 생각\n", "attributes": { "bold": true } }
     ]
   },
   {
     "id": "tpl_b",
     "userId": "user_001",
-    "name": "템플릿B",
+    "name": "자기계발서 템플릿",
     "contents": [
-      { "insert": "줄거리 요약\n" },
-      { "insert": "느낀 점\n" }
+      { "insert": "핵심 메시지\n", "attributes": { "bold": true } },
+      { "insert": "실천할 점\n", "attributes": { "bold": true } },
+      { "insert": "나의 변화 계획\n", "attributes": { "bold": true } }
     ]
   },
   {
     "id": "tpl_c",
     "userId": "user_001",
-    "name": "템플릿C",
+    "name": "인상깊은 문장 모음",
     "contents": [
-      { "insert": "좋았던 장면\n" },
-      { "insert": "배운 점\n" }
+      { "insert": "문장 1\n", "attributes": { "bold": true } },
+      { "insert": "문장 2\n", "attributes": { "strike": true } },
+      { "insert": "문장 3\n", "attributes": { "bold": true } }
     ]
   },
   {
     "id": "tpl_d",
     "userId": "user_001",
-    "name": "템플릿D",
+    "name": "나만의 템플릿",
     "contents": [
-      { "insert": "책 속 한 문장\n" },
-      { "insert": "왜 인상깊었는가\n" }
+      { "insert": "나만의 제목\n", "attributes": { "bold": true } },
+      { "insert": "내용 작성\n", "attributes": { "bold": true } }
+    ]
+  },
+  {
+    "id": "tpl_e",
+    "userId": "user_001",
+    "name": "그냥 시작하기",
+    "contents": [
     ]
   }
 ]
