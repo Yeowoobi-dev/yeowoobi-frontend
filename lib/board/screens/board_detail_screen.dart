@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'comment_tile.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 
 class BoardDetailScreen extends StatefulWidget {
@@ -18,16 +19,35 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
   bool isAnonymous = true;
   final TextEditingController _controller = TextEditingController();
   Map<String, dynamic>? replyTarget;
-
   List<dynamic> comments = [];
+
   final String _token =
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0NzcyMzE0MiwiZXhwIjoxNzQ3NzI2NzQyfQ.TKZy52YHlxL8qxarwxxYohDSAL8sxYtpitwuUnLQrx4';
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODY2Nzk3NywiZXhwIjoxNzQ4NjcxNTc3fQ.4zImnvne7m_BNdL0RXDu949w1T1ArKx6TcbaxZGEvls';
+  final String currentUserId = '07665118-717a-4ecd-906f-9ead2a22c93b';
 
   @override
   void initState() {
     super.initState();
-    likeCount = widget.post['likesCount'] ?? 0;
-    _loadComments();
+    _loadPost(); // ✅ 게시물 최신 상태
+    _loadComments(); // 댓글 로드
+  }
+
+  Future<void> _loadPost() async {
+    final postId = widget.post['id'];
+    final response = await http.get(
+      Uri.parse('http://43.202.170.189:3000/community/posts/$postId/like/status'),
+      headers: {'Authorization': _token},
+    );
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body)['data'];
+      setState(() {
+        likeCount = widget.post['likesCount'] ?? 0;
+        isLiked = data['isLiked'] ?? false;
+      });
+    } else {
+      debugPrint('게시물 로드 실패: ${response.statusCode}');
+    }
   }
 
   Future<void> _loadComments() async {
@@ -48,37 +68,114 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
 
   Future<void> _handleLikeToggle() async {
     final postId = widget.post['id'];
-    final response = await http.post(
-      Uri.parse('http://43.202.170.189:3000/community/posts/$postId/like'),
-      headers: {'Authorization': _token},
-    );
 
-    if (response.statusCode == 200) {
-      final responseBody = json.decode(response.body);
-      final success = responseBody['success'];
-      if (success != null) {
+    setState(() {
+      isLiked = !isLiked;
+      likeCount += isLiked ? 1 : -1;
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('http://43.202.170.189:3000/community/posts/$postId/like'),
+        headers: {'Authorization': _token},
+      );
+
+      if (response.statusCode != 200) {
         setState(() {
           isLiked = !isLiked;
           likeCount += isLiked ? 1 : -1;
         });
       }
-    } else {
-      debugPrint('좋아요 실패: ${response.statusCode}');
+    } catch (e) {
+      setState(() {
+        isLiked = !isLiked;
+        likeCount += isLiked ? 1 : -1;
+      });
+      debugPrint('좋아요 실패: $e');
     }
+  }
+
+  Future<void> _submitComment() async {
+    final text = _controller.text.trim();
+    if (text.isEmpty) return;
+
+    final postId = widget.post['id'];
+    final body = {
+      'content': text,
+      'isAnonymous': isAnonymous,
+    };
+
+    if (replyTarget != null) {
+      body['parentId'] = replyTarget!['id'];
+    }
+
+    final response = await http.post(
+      Uri.parse('http://43.202.170.189:3000/community/posts/$postId/comments'),
+      headers: {
+        'Authorization': _token,
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(body),
+    );
+
+    if (response.statusCode == 201) {
+      _controller.clear();
+      replyTarget = null;
+      await _loadComments();
+    } else {
+      debugPrint('댓글 작성 실패: ${response.statusCode}');
+    }
+  }
+
+  Future<void> _deleteComment(int commentId) async {
+    final response = await http.delete(
+      Uri.parse('http://43.202.170.189:3000/community/comments/$commentId'),
+      headers: {'Authorization': _token},
+    );
+
+    if (response.statusCode == 200) {
+      await _loadComments();
+    } else {
+      debugPrint('댓글 삭제 실패: ${response.body}');
+    }
+  }
+
+  Future<void> _deletePost() async {
+    final postId = widget.post['id'];
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('게시글 삭제'),
+        content: const Text('정말로 이 게시글을 삭제하시겠습니까?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('취소')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('삭제')),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    final response = await http.delete(
+      Uri.parse('http://43.202.170.189:3000/community/posts/$postId'),
+      headers: {'Authorization': _token},
+    );
+
+    if (response.statusCode == 200) {
+      Navigator.pop(context, true);
+    } else {
+      debugPrint('게시물 삭제 실패: ${response.body}');
+    }
+  }
+
+  int _countTotalComments() {
+    return comments.fold(0, (sum, c) => sum + 1 + ((c['children']?.length ?? 0) as int));
   }
 
   String _formatDate(String isoTime) {
     final date = DateTime.parse(isoTime);
     return '${date.month}.${date.day} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  void _submitComment() {
-    final text = _controller.text.trim();
-    if (text.isEmpty) return;
-    setState(() {
-      _controller.clear();
-      replyTarget = null;
-    });
   }
 
   @override
@@ -92,8 +189,15 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
         elevation: 0,
         leading: IconButton(
           icon: Image.asset('assets/icons/back.png', width: 28),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context, true),
         ),
+        actions: [
+          if (widget.post['authorId'] == currentUserId)
+            IconButton(
+              icon: const Icon(Icons.delete),
+              onPressed: _deletePost,
+            )
+        ],
       ),
       body: Column(
         children: [
@@ -131,37 +235,62 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                           children: [
                             Image.asset(
                               'assets/icons/heart.png',
-                              width: 22,
-                              color: isLiked ? cs.primary : null,
+                              width: 20,
+                              color: isLiked ? cs.primary : CustomTheme.neutral300,
                             ),
                             const SizedBox(width: 6),
-                            Text(
-                              '$likeCount',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: isLiked ? cs.primary : Colors.black,
-                              ),
+                            SizedBox(
+                              width: 20,
+                              child: likeCount > 0
+                                  ? Text(
+                                '$likeCount',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isLiked ? cs.primary : CustomTheme.neutral300,
+                                ),
+                              )
+                                  : const SizedBox.shrink(),
                             ),
                           ],
                         ),
                       ),
                       const SizedBox(width: 20),
-                      Image.asset('assets/icons/chat.png', width: 22),
+                      Image.asset('assets/icons/chat.png', width: 20),
                       const SizedBox(width: 6),
-                      Text('${comments.length}', style: const TextStyle(fontSize: 16)),
-                      const Spacer(),
-                      Image.asset('assets/icons/caution.png', width: 18),
-                      const SizedBox(width: 6),
-                      const Text('신고하기', style: TextStyle(fontSize: 15)),
+                      Text('${_countTotalComments()}', style: const TextStyle(fontSize: 14)),
                     ],
                   ),
                   const SizedBox(height: 24),
                   const Divider(thickness: 1.2, color: CustomTheme.neutral100),
                   const SizedBox(height: 16),
                   ...comments.map((comment) {
-                    return _CommentTile(
+                    return CommentTile(
                       comment: comment,
+                      currentUserId: currentUserId,
                       onReply: (target) => setState(() => replyTarget = target),
+                      onLike: (id) async {
+                        await http.post(
+                          Uri.parse('http://43.202.170.189:3000/community/comments/$id/like'),
+                          headers: {'Authorization': _token},
+                        );
+                        await _loadComments();
+                      },
+                      onDelete: (id) async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text('댓글 삭제'),
+                            content: const Text('정말로 이 댓글을 삭제하시겠습니까?'),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('취소')),
+                              TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('삭제')),
+                            ],
+                          ),
+                        );
+                        if (confirmed == true) {
+                          await _deleteComment(id);
+                        }
+                      },
                     );
                   }).toList(),
                 ],
@@ -192,8 +321,10 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                 if (replyTarget != null)
                   Padding(
                     padding: const EdgeInsets.only(top: 6, bottom: 6),
-                    child: Text('답글 대상: ${replyTarget!['username']}',
-                        style: const TextStyle(fontSize: 13, color: CustomTheme.neutral300)),
+                    child: Text(
+                      '답글 대상: ${replyTarget!['username'] ?? '익명'}',
+                      style: const TextStyle(fontSize: 13, color: CustomTheme.neutral300),
+                    ),
                   ),
                 const SizedBox(height: 10),
                 Container(
@@ -201,7 +332,13 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: Offset(0, 2))],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
@@ -227,47 +364,6 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CommentTile extends StatelessWidget {
-  final Map<String, dynamic> comment;
-  final Function(Map<String, dynamic>) onReply;
-
-  const _CommentTile({required this.comment, required this.onReply});
-
-  String _format(String isoTime) {
-    final date = DateTime.parse(isoTime);
-    return '${date.month}.${date.day} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GestureDetector(
-            onTap: () => onReply(comment),
-            child: Row(
-              children: [
-                const CircleAvatar(radius: 14, backgroundColor: CustomTheme.neutral200),
-                const SizedBox(width: 10),
-                const Text('익명', style: TextStyle(fontSize: 16)),
-                const Spacer(),
-                Text(
-                  _format(comment['createdAt']),
-                  style: const TextStyle(fontSize: 14, color: CustomTheme.neutral300),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(comment['content'], style: const TextStyle(fontSize: 16)),
         ],
       ),
     );
