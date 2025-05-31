@@ -3,6 +3,7 @@ import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:yeowoobi_frontend/book_log/models/book.dart';
 import 'package:yeowoobi_frontend/book_log/services/book_service.dart';
 import 'package:yeowoobi_frontend/book_log/screens/book_select_screen.dart';
+import 'package:yeowoobi_frontend/recommendation/screens/book_recommend_screen.dart';
 
 class BookLogScreen extends StatefulWidget {
   const BookLogScreen({super.key});
@@ -70,13 +71,28 @@ class _BookLogScreenState extends State<BookLogScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Image.asset('assets/image/logo_orange.png', height: 36),
-                  IconButton(
-                    icon: const ImageIcon(AssetImage('assets/icons/user.png'),
-                        color: Colors.black),
-                    onPressed: () {
-                      // TODO: 마이 프로필로 이동
-                    },
-                  )
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.book, color: Colors.black),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const BookRecommendScreen()),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: const ImageIcon(
+                            AssetImage('assets/icons/user.png'),
+                            color: Colors.black),
+                        onPressed: () {
+                          // TODO: 마이 프로필로 이동
+                        },
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:yeowoobi_frontend/book_log/models/template.dart';
 import 'package:flutter_quill/flutter_quill.dart' hide Text;
-import 'dart:convert';
 
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:yeowoobi_frontend/book_log/services/template_service.dart';

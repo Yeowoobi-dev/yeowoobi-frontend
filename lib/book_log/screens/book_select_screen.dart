@@ -373,18 +373,14 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16.0, vertical: 12.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Image.asset('assets/image/logo_orange.png', height: 36),
-                    IconButton(
-                      icon: const ImageIcon(AssetImage('assets/icons/user.png'),
-                          color: Colors.black),
-                      onPressed: () {
-                        // TODO: 마이 프로필로 이동
-                      },
-                    )
-                  ],
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
                 ),
               ),
 

@@ -88,5 +88,14 @@
       "publisher": "창비",
       "created_date": "2025-04-03T00:00:00",
       "updated_date": "2025-04-03T00:00:00"
+    },
+    {
+      "id": "11",
+      "title": "책 먹는 여우",
+      "author": "프란치스카 비어만",
+      "imageUrl": "https://shopping-phinf.pstatic.net/main_3246475/32464750449.20230906071325.jpg",
+      "publisher": "창비",
+      "created_date": "2025-04-03T00:00:00",
+      "updated_date": "2025-04-03T00:00:00"
     }
 ]

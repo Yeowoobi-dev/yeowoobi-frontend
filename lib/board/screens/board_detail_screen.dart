@@ -105,22 +105,29 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                 children: [
                   Row(
                     children: [
-                      const CircleAvatar(radius: 16, backgroundColor: CustomTheme.neutral200),
+                      const CircleAvatar(
+                          radius: 16, backgroundColor: CustomTheme.neutral200),
                       const SizedBox(width: 10),
                       const Text('익명', style: TextStyle(fontSize: 16)),
                       const Spacer(),
                       Text(
                         _formatDate(widget.post['createdAt']),
-                        style: const TextStyle(fontSize: 14, color: CustomTheme.neutral300),
+                        style: const TextStyle(
+                            fontSize: 14, color: CustomTheme.neutral300),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Text(widget.post['title'], style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                  Text(widget.post['title'],
+                      style: const TextStyle(
+                          fontSize: 22, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
                   Text(
                     widget.post['content'],
-                    style: const TextStyle(fontSize: 16, color: CustomTheme.neutral300, height: 1.6),
+                    style: const TextStyle(
+                        fontSize: 16,
+                        color: CustomTheme.neutral300,
+                        height: 1.6),
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -148,7 +155,8 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                       const SizedBox(width: 20),
                       Image.asset('assets/icons/chat.png', width: 22),
                       const SizedBox(width: 6),
-                      Text('${comments.length}', style: const TextStyle(fontSize: 16)),
+                      Text('${comments.length}',
+                          style: const TextStyle(fontSize: 16)),
                       const Spacer(),
                       Image.asset('assets/icons/caution.png', width: 18),
                       const SizedBox(width: 6),
@@ -163,7 +171,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                       comment: comment,
                       onReply: (target) => setState(() => replyTarget = target),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
@@ -180,7 +188,9 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        isAnonymous ? Icons.check_box : Icons.check_box_outline_blank,
+                        isAnonymous
+                            ? Icons.check_box
+                            : Icons.check_box_outline_blank,
                         size: 18,
                         color: cs.primary,
                       ),
@@ -193,7 +203,8 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 6, bottom: 6),
                     child: Text('답글 대상: ${replyTarget!['username']}',
-                        style: const TextStyle(fontSize: 13, color: CustomTheme.neutral300)),
+                        style: const TextStyle(
+                            fontSize: 13, color: CustomTheme.neutral300)),
                   ),
                 const SizedBox(height: 10),
                 Container(
@@ -201,7 +212,12 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(14),
-                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 6, offset: Offset(0, 2))],
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 6,
+                          offset: Offset(0, 2))
+                    ],
                   ),
                   child: Row(
                     children: [
@@ -255,13 +271,15 @@ class _CommentTile extends StatelessWidget {
             onTap: () => onReply(comment),
             child: Row(
               children: [
-                const CircleAvatar(radius: 14, backgroundColor: CustomTheme.neutral200),
+                const CircleAvatar(
+                    radius: 14, backgroundColor: CustomTheme.neutral200),
                 const SizedBox(width: 10),
                 const Text('익명', style: TextStyle(fontSize: 16)),
                 const Spacer(),
                 Text(
                   _format(comment['createdAt']),
-                  style: const TextStyle(fontSize: 14, color: CustomTheme.neutral300),
+                  style: const TextStyle(
+                      fontSize: 14, color: CustomTheme.neutral300),
                 ),
               ],
             ),

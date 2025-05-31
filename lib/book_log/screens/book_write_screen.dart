@@ -1,12 +1,16 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path/path.dart' as p;
+import 'dart:convert';
 
 class BookWriteScreen extends StatefulWidget {
   final List<String>? initialContents;
-  BookWriteScreen({required this.initialContents});
+  const BookWriteScreen({super.key, required this.initialContents});
 
   @override
   _BookWriteScreenState createState() => _BookWriteScreenState();
@@ -15,11 +19,13 @@ class BookWriteScreen extends StatefulWidget {
 class _BookWriteScreenState extends State<BookWriteScreen> {
   late final QuillController _controller;
   final FocusNode _editorFocusNode = FocusNode();
-  final ScrollController _editorScrollController = ScrollController();
   final TextEditingController _titleController = TextEditingController();
+  final ScrollController _editorScrollController = ScrollController();
   double? _currentFontSize;
   Attribute<dynamic> _currentAlignment = Attribute.leftAlignment;
   IconData _currentAlignmentIcon = Icons.format_align_left;
+  String? _selectedBackground;
+  List<String> _backgroundOptions = [];
 
   @override
   void initState() {
@@ -38,17 +44,31 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
     _titleController.addListener(() {
       setState(() {});
     });
+    _loadBackgroundOptions();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_editorFocusNode);
+    });
+  }
+
+  Future<void> _loadBackgroundOptions() async {
+    final manifestContent = await rootBundle.loadString('AssetManifest.json');
+    final Map<String, dynamic> manifestMap = json.decode(manifestContent);
+    final backgrounds = manifestMap.keys
+        .where((key) =>
+            key.startsWith('assets/background/') && p.extension(key) == '.png')
+        .toList();
+    setState(() {
+      _backgroundOptions = ['없음', ...backgrounds];
+      _selectedBackground = null;
     });
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _editorScrollController.dispose();
     _editorFocusNode.dispose();
     _titleController.dispose();
+    _editorScrollController.dispose();
     super.dispose();
   }
 
@@ -56,12 +76,13 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CustomTheme.neutral100,
+      resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: Column(
           children: [
             // 앱바 영역
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
               child: Row(
                 children: [
                   Padding(
@@ -74,7 +95,10 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: const Text('임시 저장하시겠습니까?'),
+                              title: const Text(
+                                '임시 저장하시겠습니까?',
+                                style: TextStyle(fontSize: 18),
+                              ),
                               actions: [
                                 TextButton(
                                   onPressed: () {
@@ -109,6 +133,18 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                         FocusScope.of(context).unfocus();
                       } else {
                         FocusScope.of(context).requestFocus(_editorFocusNode);
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          final renderBox = _editorFocusNode.context
+                              ?.findRenderObject() as RenderBox?;
+                          if (renderBox != null && renderBox.attached) {
+                            Scrollable.ensureVisible(
+                              _editorFocusNode.context!,
+                              alignment: 1.0,
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        });
                       }
                     },
                   ),
@@ -124,51 +160,104 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                 ],
               ),
             ),
+            const Divider(
+              //앱바와 에디터 사이의 구분선
+              thickness: 0.5,
+              height: 1,
+              color: CustomTheme.neutral200,
+            ),
             // 제목 입력 및 에디터 영역
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      child: TextField(
-                        controller: _titleController,
-                        decoration: InputDecoration(
-                          hintText: '제목을 입력하세요!',
-                          border: InputBorder.none,
-                          hintStyle: TextStyle(
-                            color: CustomTheme.neutral200,
-                            fontSize: 20,
-                          ),
-                        ),
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+            Flexible(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final screenWidth = MediaQuery.of(context).size.width;
+                  final backgroundHeight = screenWidth * 1.414;
+                  final estimatedLineCount =
+                      _controller.document.toPlainText().split('\n').length;
+                  final estimatedContentHeight =
+                      estimatedLineCount * 24.0 + 200;
+                  final availableHeight = constraints.maxHeight;
+                  final requiredHeight =
+                      estimatedContentHeight > availableHeight
+                          ? estimatedContentHeight
+                          : availableHeight;
+                  final repeatCount =
+                      (requiredHeight / backgroundHeight).ceil();
+
+                  return SingleChildScrollView(
+                    controller: _editorScrollController,
+                    child: Column(
+                      children: List.generate(repeatCount, (index) {
+                        return Stack(
+                          children: [
+                            _selectedBackground != null
+                                ? Image.asset(
+                                    _selectedBackground!,
+                                    width: screenWidth,
+                                    height: backgroundHeight,
+                                    fit: BoxFit.cover,
+                                  )
+                                : Container(
+                                    width: screenWidth,
+                                    height: backgroundHeight,
+                                    color: CustomTheme.neutral100,
+                                  ),
+                            if (index == 0)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 4),
+                                child: TextField(
+                                  controller: _titleController,
+                                  decoration: InputDecoration(
+                                    hintText: '제목을 입력하세요!',
+                                    border: InputBorder.none,
+                                    hintStyle: TextStyle(
+                                      color: CustomTheme.neutral200,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            if (index == 0)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 56),
+                                child: Divider(
+                                    thickness: 0.5,
+                                    color: CustomTheme.neutral200),
+                              ),
+                            if (index == 0)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 70),
+                                child: QuillEditor(
+                                  focusNode: _editorFocusNode,
+                                  scrollController: _editorScrollController,
+                                  controller: _controller,
+                                  config: QuillEditorConfig(
+                                    padding: const EdgeInsets.all(18),
+                                    autoFocus: true,
+                                    expands: false,
+                                    scrollable: false,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      }),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Divider(
-                          thickness: 0.5, color: CustomTheme.neutral200),
-                    ),
-                    QuillEditor(
-                      focusNode: _editorFocusNode,
-                      scrollController: _editorScrollController,
-                      controller: _controller,
-                      config: QuillEditorConfig(
-                        padding: const EdgeInsets.all(18), // 좌우 여백
-                      ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
             // 툴바 영역
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Divider(thickness: 0.5, color: CustomTheme.neutral200),
+            const Divider(
+              //앱바와 에디터 사이의 구분선
+              thickness: 0.5,
+              height: 1,
+              color: CustomTheme.neutral200,
             ),
             Container(
               height: 40,
@@ -212,13 +301,6 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                       controller: _controller,
                       attribute: Attribute.blockQuote,
                     ),
-                    /*QuillToolbarSelectHeaderStyleDropdownButton(
-                      // 헤더 스타일
-                      controller: _controller,
-                    ),*/
-                    /*QuillToolbarSelectAlignmentButton(
-                      controller: _controller,
-                    ),*/
                     IconButton(
                       // 정렬
                       icon: Icon(_currentAlignmentIcon),
@@ -242,6 +324,49 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                     QuillToolbarColorButton(
                       controller: _controller,
                       isBackground: false,
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Row(
+                        children: [
+                          const Text("배경지"),
+                          const SizedBox(width: 4),
+                          DropdownButton<String>(
+                            value: _selectedBackground,
+                            underline: SizedBox.shrink(),
+                            items: _backgroundOptions.map((path) {
+                              return DropdownMenuItem(
+                                value: path == '없음' ? null : path,
+                                child: path == '없음'
+                                    ? const Text('없음')
+                                    : Container(
+                                        width: 24,
+                                        height: 24,
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            image: AssetImage(path),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          border: Border.all(
+                                              color: Colors.grey.shade300),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                      ),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedBackground = value;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    QuillToolbarSelectHeaderStyleDropdownButton(
+                      // 헤더 스타일
+                      controller: _controller,
                     ),
                     Container(
                       width: 60,

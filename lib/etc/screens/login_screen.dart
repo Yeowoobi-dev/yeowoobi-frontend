@@ -18,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _introductionController = TextEditingController();
 
   bool _isValid = false;
-  Set<String> _selectedKeywords = {};
+  final Set<String> _selectedKeywords = {};
 
   final List<String> _keywords = [
     '정치/사회',
