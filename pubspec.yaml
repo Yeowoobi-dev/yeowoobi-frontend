@@ -28,12 +28,10 @@ flutter:
      - assets/image/logo_orange.png
      - assets/image/kakao_login_large_wide.png
      - assets/image/fox.png
-     - assets/image/q1.png
-     - assets/image/q2.png
      - assets/icons/
-     - assets/yeowoong/yeowoong1.png
+     - assets/image/
      - assets/background/
-     
+     - assets/gif/
      - assets/dummy.json
      - assets/new.json
      - assets/template.json
