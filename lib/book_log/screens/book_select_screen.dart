@@ -16,26 +16,7 @@ class BookSelectScreen extends StatefulWidget {
 
 class _BookSelectScreenState extends State<BookSelectScreen> {
   double _rating = 0;
-  final List<String> _keywords = [
-    '정치/사회',
-    '언론/미디어',
-    '영업',
-    '마케팅/홍보',
-    '법률',
-    '의료/복지',
-    '문화/예술',
-    '소설',
-    'SF/판타지',
-    '역사',
-    'IT/과학',
-    '자기 개발',
-    '아웃도어/레저',
-    '교육',
-    '육아',
-    '경제/금융',
-    '스릴러/공포',
-    '여우비',
-  ];
+  List<String> _keywords = [];
   final Set<String> _selectedKeywords = {};
 
   final TextEditingController _searchController = TextEditingController();
@@ -60,7 +41,7 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
               (item['contents'] as List)
                   .every((e) => e is Map<String, dynamic>))
           .cast<Map<String, dynamic>>()
-          .take(4)
+          .take(5)
           .toList();
     });
   }
@@ -79,6 +60,17 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
       });
     });
     _loadTemplateNames(); // 템플릿 이름 로딩
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadKeywords(); // 카테고리 키워드 로딩
+    });
+  }
+
+  Future<void> _loadKeywords() async {
+    final jsonString = await rootBundle.loadString('assets/book_category.json');
+    final List<dynamic> jsonData = jsonDecode(jsonString);
+    setState(() {
+      _keywords = jsonData.map((e) => e['name'] as String).toList();
+    });
   }
 
   Future<void> _refreshBooks() async {
@@ -113,6 +105,8 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                 padding: const EdgeInsets.only(top: 8.0),
                 child: IconButton(
                   icon: const Icon(Icons.arrow_back_ios),
+                  splashColor: Colors.transparent,
+                  highlightColor: Colors.transparent,
                   onPressed: () {
                     setState(() {
                       _selectedBook = null;
@@ -155,23 +149,31 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: List.generate(5, (index) {
+                            final starValue = index + 1;
                             return IconButton(
                               icon: Icon(
-                                index < _rating
+                                _rating >= starValue
                                     ? Icons.star
                                     : Icons.star_border,
                                 color: Colors.amber,
                               ),
+                              splashColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
                               onPressed: () {
                                 setState(() {
-                                  _rating = index + 1.0;
+                                  _rating = _rating == starValue
+                                      ? 0
+                                      : starValue.toDouble();
                                 });
                               },
+                              iconSize: 32,
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(),
                             );
                           }),
                         ),
-                        Text("별점을 남겨주세요.",
-                            style: TextStyle(color: Colors.grey)),
+                        //Text("별점을 남겨주세요.",
+                        //  style: TextStyle(color: Colors.grey)),
                       ],
                     ),
                   ),
@@ -240,8 +242,6 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                               content: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Image.asset('assets/image/logo_orange.png',
-                                      height: 36),
                                   const SizedBox(height: 16),
                                   const Text(
                                     "독서록 템플릿을 골라주세요!",
@@ -377,6 +377,8 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                   alignment: Alignment.centerLeft,
                   child: IconButton(
                     icon: const Icon(Icons.arrow_back_ios),
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
