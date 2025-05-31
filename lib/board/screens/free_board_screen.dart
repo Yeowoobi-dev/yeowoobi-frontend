@@ -23,7 +23,7 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
 
   final String _apiUrl = 'http://43.202.170.189:3000/community/posts';
   final String _token =
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0NzcyMzE0MiwiZXhwIjoxNzQ3NzI2NzQyfQ.TKZy52YHlxL8qxarwxxYohDSAL8sxYtpitwuUnLQrx4'; // 전체 토큰으로 교체
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODY2Nzk3NywiZXhwIjoxNzQ4NjcxNTc3fQ.4zImnvne7m_BNdL0RXDu949w1T1ArKx6TcbaxZGEvls';
 
   @override
   void initState() {
@@ -85,8 +85,7 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
 
       if (index == 0) {
         posts.sort((a, b) =>
-            DateTime.parse(b['createdAt'])
-                .compareTo(DateTime.parse(a['createdAt'])));
+            DateTime.parse(b['createdAt']).compareTo(DateTime.parse(a['createdAt'])));
       } else {
         posts.sort((a, b) => b['likesCount'].compareTo(a['likesCount']));
       }
@@ -97,6 +96,12 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Color _likeColor(Map<String, dynamic> post) {
+    return (post['isLiked'] ?? false)
+        ? Theme.of(context).colorScheme.primary  // ✅ 오류 수정: 여기
+        : CustomTheme.neutral300;
   }
 
   @override
@@ -186,13 +191,16 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
                     itemBuilder: (context, index) {
                       final post = posts[index];
                       return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => BoardDetailScreen(post: post),
                             ),
                           );
+                          if (result == true) {
+                            await _loadPosts(); // ✨ 돌아오면 새로고침
+                          }
                         },
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,13 +238,23 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
                                   const SizedBox(height: 8),
                                   Row(
                                     children: [
-                                      Image.asset('assets/icons/heart.png',
-                                          width: 18),
+                                      Image.asset(
+                                        'assets/icons/heart.png',
+                                        width: 18,
+                                        color: _likeColor(post),
+                                      ),
                                       const SizedBox(width: 4),
-                                      Text('${post['likesCount']}'),
+                                      Text(
+                                        '${post['likesCount']}',
+                                        style: TextStyle(
+                                          color: _likeColor(post),
+                                        ),
+                                      ),
                                       const SizedBox(width: 12),
-                                      Image.asset('assets/icons/chat.png',
-                                          width: 18),
+                                      Image.asset(
+                                        'assets/icons/chat.png',
+                                        width: 18,
+                                      ),
                                       const SizedBox(width: 4),
                                       Text('${post['commentsCount']}'),
                                     ],
