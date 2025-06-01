@@ -21,8 +21,8 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
 
   final TextEditingController _searchController = TextEditingController();
 
-  List<Book>? _filteredBooks;
   List<Book> _allBooks = [];
+  List<Book>? _filteredBooks;
 
   Book? _selectedBook;
 
@@ -49,16 +49,7 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
   @override
   void initState() {
     super.initState();
-    _bookFuture = NewBookService.fetchNewBooks().then((books) {
-      _allBooks = books;
-      return books;
-    });
-
-    _searchController.addListener(() {
-      setState(() {
-        _filteredBooks = _filterBooks(_allBooks, _searchController.text);
-      });
-    });
+    _bookFuture = Future.value([]);
     _loadTemplateNames(); // 템플릿 이름 로딩
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadKeywords(); // 카테고리 키워드 로딩
@@ -74,22 +65,193 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
   }
 
   Future<void> _refreshBooks() async {
-    final books = await NewBookService.fetchNewBooks();
+    final books = await NewBookService.fetchNewBooks(_searchController.text);
     setState(() {
       _allBooks = books;
       _bookFuture = Future.value(books);
-      _filteredBooks = _filterBooks(books, _searchController.text);
     });
   }
 
-  List<Book> _filterBooks(List<Book> books, String query) {
-    final lowerQuery = query.toLowerCase();
-    return books.where((book) {
-      return book.title.toLowerCase().contains(lowerQuery) ||
-          book.author.toLowerCase().contains(lowerQuery);
-    }).toList();
+  void _performSearch() async {
+    final books = await NewBookService.fetchNewBooks(_searchController.text);
+    setState(() {
+      _allBooks = books;
+      _bookFuture = Future.value(books);
+    });
   }
 
+// 도서 검색 화면
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            if (_selectedBook == null) ...[
+              // 1. AppBar 영역
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 16.0, vertical: 12.0),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios),
+                        splashColor: Colors.transparent,
+                        highlightColor: Colors.transparent,
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ),
+                    const Center(
+                      child: Text(
+                        "도서 검색",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: _performSearch,
+                        child: const Text(
+                          '검색',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // 2. 검색바
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
+                child: TextField(
+                  controller: _searchController,
+                  onSubmitted: (_) => _performSearch(),
+                  decoration: InputDecoration(
+                    hintText: '책 제목, 작가를 검색해보세요!',
+                    prefixIcon: Padding(
+                      padding: EdgeInsets.all(15.0),
+                      child: ImageIcon(
+                        AssetImage('assets/icons/search.png'),
+                        size: 14,
+                      ),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        _searchController.clear();
+                      },
+                    ),
+                    fillColor: CustomTheme.neutral100,
+                    filled: true,
+                    isDense: true,
+                    contentPadding: EdgeInsets.symmetric(vertical: 8.0),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 5),
+            ],
+
+            // 3. 리스트로 책 출력
+            Expanded(
+              child: _selectedBook != null
+                  ? _buildDetailView(_selectedBook!)
+                  : FutureBuilder<List<Book>>(
+                      future: _bookFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return const Center(child: Text('데이터 로딩 실패'));
+                        } else if (!snapshot.hasData ||
+                            snapshot.data!.isEmpty) {
+                          return const Center(child: Text('검색되는 책이 없습니다.'));
+                        }
+
+                        final booksToShow = snapshot.data!;
+                        return ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          itemCount: booksToShow.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final book = booksToShow[index];
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _selectedBook = book;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 6,
+                                      offset: Offset(2, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Image.network(book.imageUrl,
+                                        width: 50,
+                                        height: 70,
+                                        fit: BoxFit.cover),
+                                    const SizedBox(width: 16),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(book.title,
+                                              style: TextStyle(
+                                                  fontWeight: FontWeight.bold)),
+                                          Text(book.author,
+                                              style: TextStyle(
+                                                  color: Colors.grey[600])),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 카테고리 선택 화면
   Widget _buildDetailView(Book book) {
     final cs = Theme.of(context).colorScheme;
 
@@ -148,7 +310,7 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                             style: const TextStyle(color: Colors.grey)),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: List.generate(5, (index) {
+                          /*children: List.generate(5, (index) {
                             final starValue = index + 1;
                             return IconButton(
                               icon: Icon(
@@ -170,7 +332,7 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                               padding: EdgeInsets.zero,
                               constraints: BoxConstraints(),
                             );
-                          }),
+                          }),*/
                         ),
                         //Text("별점을 남겨주세요.",
                         //  style: TextStyle(color: Colors.grey)),
@@ -191,7 +353,7 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 42),
               Text('카테고리',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
               const SizedBox(height: 12),
@@ -269,10 +431,16 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                                             Navigator.of(context).pop();
                                             Navigator.of(context).push(
                                               PageRouteBuilder(
+                                                // 로그데이터 넘기기
                                                 pageBuilder: (context,
                                                         animation,
                                                         secondaryAnimation) =>
                                                     BookWriteScreen(
+                                                  bookTitle: book.title,
+                                                  bookImage: book.imageUrl,
+                                                  author: book.author,
+                                                  category: _selectedKeywords
+                                                      .join(', '),
                                                   initialContents:
                                                       (tpl['contents']
                                                               as List<dynamic>)
@@ -358,149 +526,6 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            if (_selectedBook == null) ...[
-              // 1. AppBar 영역
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 12.0),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    splashColor: Colors.transparent,
-                    highlightColor: Colors.transparent,
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ),
-              ),
-
-              // 2. 검색바
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4.0),
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText: '책 제목, 작가를 검색해보세요!',
-                    prefixIcon: Padding(
-                      padding: EdgeInsets.all(15.0),
-                      child: ImageIcon(
-                        AssetImage('assets/icons/search.png'),
-                        size: 14,
-                      ),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.clear),
-                      onPressed: () {
-                        _searchController.clear();
-                      },
-                    ),
-                    fillColor: CustomTheme.neutral100,
-                    filled: true,
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 8.0),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 5),
-            ],
-
-            // 3. 리스트로 책 출력
-            Expanded(
-              child: _selectedBook != null
-                  ? _buildDetailView(_selectedBook!)
-                  : FutureBuilder<List<Book>>(
-                      future: _bookFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return const Center(child: Text('데이터 로딩 실패'));
-                        } else if (!snapshot.hasData ||
-                            snapshot.data!.isEmpty) {
-                          return const Center(child: Text('표시할 책이 없습니다.'));
-                        }
-
-                        final booksToShow = _filteredBooks ?? snapshot.data!;
-                        return ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          itemCount: booksToShow.length,
-                          separatorBuilder: (_, __) =>
-                              const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final book = booksToShow[index];
-                            return GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _selectedBook = book;
-                                });
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black12,
-                                      blurRadius: 6,
-                                      offset: Offset(2, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  children: [
-                                    Image.network(book.imageUrl,
-                                        width: 50,
-                                        height: 70,
-                                        fit: BoxFit.cover),
-                                    const SizedBox(width: 16),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(book.title,
-                                              style: TextStyle(
-                                                  fontWeight: FontWeight.bold)),
-                                          Text(book.author,
-                                              style: TextStyle(
-                                                  color: Colors.grey[600])),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-            ),
-          ],
         ),
       ),
     );

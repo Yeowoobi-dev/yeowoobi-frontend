@@ -70,7 +70,16 @@ class _BookLogScreenState extends State<BookLogScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Image.asset('assets/image/logo_orange.png', height: 36),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                            builder: (context) => const BookLogScreen()),
+                      );
+                    },
+                    child:
+                        Image.asset('assets/image/logo_orange.png', height: 36),
+                  ),
                   Row(
                     children: [
                       IconButton(
@@ -139,9 +148,8 @@ class _BookLogScreenState extends State<BookLogScreen> {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return const Center(child: Text('데이터 로딩 실패'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('표시할 독서록이 없습니다.'));
-                }
+                } else
+                  (!snapshot.hasData || snapshot.data!.isEmpty);
                 final books = snapshot.data!;
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -219,7 +227,9 @@ class _BookLogScreenState extends State<BookLogScreen> {
                       } else if (snapshot.hasError) {
                         return const Center(child: Text('데이터 로딩 실패'));
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                        return const Center(child: Text('표시할 독서록이 없습니다.'));
+                        return const Center(
+                            child: Text('아직 독서록이 없어요!',
+                                style: TextStyle(fontSize: 18)));
                       }
                       final books = snapshot.data!;
                       final booksToShow = _filteredBooks ?? books;

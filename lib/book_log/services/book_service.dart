@@ -1,14 +1,17 @@
-// book_log/services/book_service.dart
-
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/book.dart';
+import '../models/logData.dart';
 
+// 내 독서록 목록 호출 (지금은 더미데이터)
 class MyBookLogService {
-  // 내 독서록
   static Future<List<Book>> fetchDummyBooks() async {
     try {
       final String response = await rootBundle.loadString('assets/dummy.json');
+      print("Raw dummy.json content loaded");
+      print(response); // Log the JSON content
       final List<dynamic> data = json.decode(response);
       return data.map((json) => Book.fromJson(json)).toList();
     } catch (e) {
@@ -19,17 +22,72 @@ class MyBookLogService {
   }
 }
 
+// 도서 검색 API GET 요청
 class NewBookService {
-  // 도서 검색
-  static Future<List<Book>> fetchNewBooks() async {
+  static Future<List<Book>> fetchNewBooks(String keyword) async {
+    final url = Uri.parse(
+        'http://43.202.170.189:3000/book-logs/search?query=$keyword&display=10&start=1');
+
     try {
-      final String response = await rootBundle.loadString('assets/new.json');
-      final List<dynamic> data = json.decode(response);
-      return data.map((json) => Book.fromJson(json)).toList();
+      final response = await http.get(
+        url,
+        headers: {
+          //'Authorization': 'Bearer ${dotenv.env['BEARER_TOKEN']}',
+          'Authorization':
+              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImExOTY1MjE1LWRkZDUtNDBlNS04NjZmLTQyNDMxZWE4OGE0ZCIsImlhdCI6MTc0ODc0OTk4MCwiZXhwIjoxNzUxMzQxOTgwfQ.2unp5SCwOVZwpQXX2-cbW1YEM7rttWTORS4W9qR-JaI',
+        },
+      );
+
+      // 디버깅용 로그 from book_service.dart
+      print('Status Code: ${response.statusCode} frrom 도서 검색 API');
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        final List<dynamic> items = jsonBody['data']['items'];
+
+        return items
+            .map((item) => Book(
+                  id: '', // id는 사용하지 않음
+                  title: item['title'] ?? '',
+                  author: item['author'] ?? '',
+                  imageUrl: item['image'] ?? '',
+                ))
+            .toList();
+      } else {
+        throw Exception('도서 검색 API 실패: ${response.statusCode}');
+      }
     } catch (e) {
-      // 에러 처리
-      print("Error loading new books: $e");
+      print("Error fetching books from API: $e");
       return [];
+    }
+  }
+}
+
+// 독서록 작성 POST 요청
+class NewBookLogSPost {
+  static Future<bool> postBookLog(Map<String, dynamic> logData) async {
+    final url = Uri.parse('http://43.202.170.189:3000/book-logs/log');
+
+    print('POST URL: $url');
+    print('Sending logData to server: ${jsonEncode(logData)}');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization':
+            'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImExOTY1MjE1LWRkZDUtNDBlNS04NjZmLTQyNDMxZWE4OGE0ZCIsImlhdCI6MTc0ODc0OTk4MCwiZXhwIjoxNzUxMzQxOTgwfQ.2unp5SCwOVZwpQXX2-cbW1YEM7rttWTORS4W9qR-JaI',
+      },
+      body: jsonEncode(logData),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print('독서록 작성 POST 성공');
+      return true;
+    } else {
+      print('독서록 작성 POST 실패: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      throw Exception('POST 실패');
     }
   }
 }
