@@ -5,9 +5,13 @@
     "name": "소설 템플릿",
     "contents": [
       { "insert": "주요 등장인물 소개\n", "attributes": { "bold": true } },
+      { "insert": "\n" },
       { "insert": "줄거리 요약\n", "attributes": { "bold": true } },
+      { "insert": "\n" },
       { "insert": "인상 깊었던 장면\n", "attributes": { "bold": true } },
-      { "insert": "나의 생각\n", "attributes": { "bold": true } }
+      { "insert": "\n" },
+      { "insert": "나의 생각\n", "attributes": { "bold": true } },
+      { "insert": "\n" }
     ]
   },
   {
@@ -16,8 +20,11 @@
     "name": "자기계발서 템플릿",
     "contents": [
       { "insert": "핵심 메시지\n", "attributes": { "bold": true } },
+      { "insert": "\n" },
       { "insert": "실천할 점\n", "attributes": { "bold": true } },
-      { "insert": "나의 변화 계획\n", "attributes": { "bold": true } }
+      { "insert": "\n" },
+      { "insert": "나의 변화 계획\n", "attributes": { "bold": true } },
+      { "insert": "\n" }
     ]
   },
   {
@@ -25,9 +32,12 @@
     "userId": "user_001",
     "name": "인상깊은 문장 모음",
     "contents": [
-      { "insert": "문장 1\n", "attributes": { "bold": true } },
-      { "insert": "문장 2\n", "attributes": { "strike": true } },
-      { "insert": "문장 3\n", "attributes": { "bold": true } }
+      { "insert": "문장 1\n", "attributes": { "block": "quote" } },
+      { "insert": "\n" },
+      { "insert": "문장 2\n", "attributes": { "block": "quote" } },
+      { "insert": "\n" },
+      { "insert": "문장 3\n", "attributes": { "block": "quote" } },
+      { "insert": "\n" }
     ]
   },
   {
@@ -36,7 +46,9 @@
     "name": "나만의 템플릿",
     "contents": [
       { "insert": "나만의 제목\n", "attributes": { "bold": true } },
-      { "insert": "내용 작성\n", "attributes": { "bold": true } }
+      { "insert": "\n" },
+      { "insert": "내용 작성\n", "attributes": { "bold": true } },
+      { "insert": "\n" }
     ]
   },
   {
