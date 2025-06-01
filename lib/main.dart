@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
+import 'package:yeowoobi_frontend/etc/screens/splash_screen.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 void main() {
+  KakaoSdk.init(nativeAppKey: '1634174a8acc8c329f268e93b42f0f0b');
   runApp(const MyApp());
 }
 
@@ -15,10 +17,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: CustomTheme.lightTheme, // 라이트 테마
+      theme: CustomTheme.lightTheme,
       title: 'Yeowoobi',
-      darkTheme: CustomTheme.darkTheme, // 다크 테마
-      themeMode: ThemeMode.system, // 시스템 설정 따라
+      darkTheme: CustomTheme.darkTheme,
+      themeMode: ThemeMode.system,
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -29,7 +31,7 @@ class MyApp extends StatelessWidget {
         Locale('en'),
         Locale('ko'),
       ],
-      home: HomeScreen(), // 시작 화면
+      home: const SplashScreen(),
     );
   }
 }
