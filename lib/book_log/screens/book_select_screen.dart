@@ -273,16 +273,20 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                                                         animation,
                                                         secondaryAnimation) =>
                                                     BookWriteScreen(
-                                                  initialContents: (tpl[
-                                                              'contents']
-                                                          as List<dynamic>)
-                                                      .map((e) =>
-                                                          (e as Map<String,
-                                                                      dynamic>)[
-                                                                  'insert']
-                                                              ?.toString() ??
-                                                          '')
-                                                      .toList(),
+                                                  initialContents:
+                                                      (tpl['contents']
+                                                              as List<dynamic>)
+                                                          .map((e) {
+                                                    if (e is Map<String,
+                                                            dynamic> &&
+                                                        e.containsKey(
+                                                            'insert')) {
+                                                      return e;
+                                                    }
+                                                    return {
+                                                      'insert': e.toString()
+                                                    };
+                                                  }).toList(),
                                                 ),
                                                 transitionsBuilder: (context,
                                                     animation,

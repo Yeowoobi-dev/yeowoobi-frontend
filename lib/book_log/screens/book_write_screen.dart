@@ -7,9 +7,10 @@ import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as p;
 import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
 
 class BookWriteScreen extends StatefulWidget {
-  final List<String>? initialContents;
+  final List<dynamic>? initialContents;
   const BookWriteScreen({super.key, required this.initialContents});
 
   @override
@@ -31,9 +32,7 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
   void initState() {
     super.initState();
     if (widget.initialContents != null && widget.initialContents!.isNotEmpty) {
-      final delta = Delta()
-        ..insert(widget.initialContents!.join('\n\n'))
-        ..insert('\n');
+      final delta = Delta.fromJson(widget.initialContents!);
       _controller = QuillController(
         document: Document.fromDelta(delta),
         selection: const TextSelection.collapsed(offset: 0),
@@ -151,10 +150,22 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                   IconButton(
                     // 저장 버튼
                     icon: const Icon(Icons.save),
-                    onPressed: () {
-                      // 실제 저장 로직 추가 필요
-                      Navigator.of(context)
-                          .popUntil((route) => route.isFirst); // 홈화면으로 이동
+                    onPressed: () async {
+                      final title = _titleController.text.trim();
+                      final deltaJson = _controller.document.toDelta().toJson();
+
+                      final logData = {
+                        'title': title,
+                        'contents': deltaJson,
+                        'createdAt': DateTime.now().toIso8601String(),
+                      };
+
+                      final directory =
+                          await getApplicationDocumentsDirectory();
+                      final file = File('${directory.path}/log.json');
+                      await file.writeAsString(jsonEncode(logData));
+
+                      Navigator.of(context).popUntil((route) => route.isFirst);
                     },
                   ),
                 ],
@@ -338,7 +349,18 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                               return DropdownMenuItem(
                                 value: path == '없음' ? null : path,
                                 child: path == '없음'
-                                    ? const Text('없음')
+                                    ? Container(
+                                        width: 24,
+                                        height: 24,
+                                        decoration: BoxDecoration(
+                                          color:
+                                              CustomTheme.lightBackgroundColor,
+                                          border: Border.all(
+                                              color: Colors.grey.shade300),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                      )
                                     : Container(
                                         width: 24,
                                         height: 24,
@@ -412,9 +434,13 @@ void navigateToBookWriteScreen(BuildContext context, Map<String, dynamic> tpl) {
   Navigator.of(context).push(
     PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => BookWriteScreen(
-        initialContents: (tpl['contents'] as List<dynamic>)
-            .map((e) => (e as Map<String, dynamic>)['insert']?.toString() ?? '')
-            .toList(),
+        initialContents: (tpl['contents'] as List).map((e) {
+          print("내용 항목 타입: ${e.runtimeType} 값: $e");
+          if (e is Map<String, dynamic> && e.containsKey('insert')) {
+            return e;
+          }
+          return {'insert': e.toString()};
+        }).toList(),
       ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final tween = Tween(

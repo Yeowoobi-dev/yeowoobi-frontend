@@ -15,7 +15,12 @@ class Template {
       id: json['id'],
       userId: json['userId'],
       name: json['name'],
-      contents: List<Map<String, dynamic>>.from(json['contents']),
+      contents: (json['contents'] as List).map((e) {
+        if (e is Map<String, dynamic>) {
+          return e.containsKey('insert') ? e : {'insert': e.toString()};
+        }
+        return {'insert': e.toString()};
+      }).toList(),
     );
   }
 
