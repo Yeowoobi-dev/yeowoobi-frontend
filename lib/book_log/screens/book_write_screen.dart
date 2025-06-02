@@ -3,15 +3,28 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
+import 'package:yeowoobi_frontend/book_log/services/book_service.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as p;
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
+import 'package:yeowoobi_frontend/book_log/screens/detail_screen.dart';
 
 class BookWriteScreen extends StatefulWidget {
   final List<dynamic>? initialContents;
-  const BookWriteScreen({super.key, required this.initialContents});
+  final String bookTitle;
+  final String bookImage;
+  final String author;
+  final String category;
+  const BookWriteScreen({
+    super.key,
+    required this.initialContents,
+    required this.bookTitle,
+    required this.bookImage,
+    required this.author,
+    required this.category,
+  });
 
   @override
   _BookWriteScreenState createState() => _BookWriteScreenState();
@@ -31,7 +44,15 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.initialContents != null && widget.initialContents!.isNotEmpty) {
+    // 넘어온 데이터 출력
+    print('BookWriteScreen loaded with:');
+    print('Title: ${widget.bookTitle}');
+    print('Author: ${widget.author}');
+    print('Image URL: ${widget.bookImage}');
+    print('Category: ${widget.category}');
+    if (widget.initialContents != null &&
+        widget.initialContents!.isNotEmpty &&
+        Delta.fromJson(widget.initialContents!).isNotEmpty) {
       final delta = Delta.fromJson(widget.initialContents!);
       _controller = QuillController(
         document: Document.fromDelta(delta),
@@ -46,6 +67,12 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
     _loadBackgroundOptions();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context).requestFocus(_editorFocusNode);
+      _controller.formatSelection(Attribute.clone(Attribute.bold, null));
+      _controller.formatSelection(Attribute.clone(Attribute.italic, null));
+      _controller.formatSelection(Attribute.clone(Attribute.underline, null));
+      _controller
+          .formatSelection(Attribute.clone(Attribute.strikeThrough, null));
+      _controller.formatSelection(Attribute.clone(Attribute.blockQuote, null));
     });
   }
 
@@ -87,7 +114,7 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                   Padding(
                     padding: const EdgeInsets.only(left: 0.0),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
+                      icon: const Icon(Icons.arrow_back_ios),
                       // onPressed: () => Navigator.pop(context).pop(),
                       onPressed: () {
                         showDialog(
@@ -151,21 +178,81 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                     // 저장 버튼
                     icon: const Icon(Icons.save),
                     onPressed: () async {
-                      final title = _titleController.text.trim();
-                      final deltaJson = _controller.document.toDelta().toJson();
+                      final TextEditingController _reviewController =
+                          TextEditingController();
+                      final result = await showDialog<String>(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('한줄 리뷰'),
+                            content: SizedBox(
+                              width: 300, // fixed width
+                              child: TextField(
+                                controller: _reviewController,
+                                maxLength: 50,
+                                decoration: const InputDecoration(
+                                  hintText: '최대 50자까지 입력할 수 있어요',
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop('public'),
+                                child: const Text('공개'),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.of(context).pop('private'),
+                                child: const Text('비공개'),
+                              ),
+                            ],
+                          );
+                        },
+                      );
 
-                      final logData = {
-                        'title': title,
-                        'contents': deltaJson,
-                        'createdAt': DateTime.now().toIso8601String(),
-                      };
+                      if (result != null) {
+                        final title = _titleController.text.trim();
+                        final deltaJson =
+                            _controller.document.toDelta().toJson();
 
-                      final directory =
-                          await getApplicationDocumentsDirectory();
-                      final file = File('${directory.path}/log.json');
-                      await file.writeAsString(jsonEncode(logData));
+                        print('Delta: $deltaJson'); // 디버깅용 로그
 
-                      Navigator.of(context).popUntil((route) => route.isFirst);
+                        final logData = Map<String, dynamic>.from({
+                          //'userId': "c1f93145-4ec4-404a-9f6c-991803095d64",
+                          'title': title,
+                          'text': deltaJson,
+                          'background': _selectedBackground ?? '',
+                          'visibility': result,
+                          'review': _reviewController.text.trim(),
+                          'bookTitle': widget.bookTitle,
+                          'bookImage': widget.bookImage,
+                          'author': widget.author,
+                          'category': widget.category,
+                          'createdAt': DateTime.now().toIso8601String(),
+                          'updatedAt': DateTime.now().toIso8601String(),
+                        });
+/*
+                        // 디버깅 로그 from book_write_screen.dart
+                        print('Saving log data:');
+                        print('Log Title: $title');
+                        print('Review: ${_reviewController.text.trim()}');
+                        print('Background: $_selectedBackground');
+                        print('Author: ${widget.author}');
+                        print('Category: ${widget.category}');
+*/
+                        // 서버로 저장 (POST)
+                        final success =
+                            await NewBookLogSPost.postBookLog(logData);
+                        if (success) {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => const DetailScreen(),
+                            ),
+                          );
+                        }
+                      }
                     },
                   ),
                 ],
@@ -183,25 +270,25 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                 builder: (context, constraints) {
                   final screenWidth = MediaQuery.of(context).size.width;
                   final backgroundHeight = screenWidth * 1.414;
-                  final estimatedLineCount =
-                      _controller.document.toPlainText().split('\n').length;
-                  final estimatedContentHeight =
-                      estimatedLineCount * 24.0 + 200;
-                  final availableHeight = constraints.maxHeight;
-                  final requiredHeight =
-                      estimatedContentHeight > availableHeight
-                          ? estimatedContentHeight
-                          : availableHeight;
+                  final baseHeight =
+                      _controller.document.toPlainText().split('\n').length *
+                          28.0;
+                  final estimatedContentHeight = baseHeight <
+                          constraints.maxHeight
+                      ? constraints.maxHeight +
+                          MediaQuery.of(context).viewInsets.bottom
+                      : baseHeight + MediaQuery.of(context).viewInsets.bottom;
                   final repeatCount =
-                      (requiredHeight / backgroundHeight).ceil();
+                      (estimatedContentHeight / backgroundHeight).ceil();
 
                   return SingleChildScrollView(
                     controller: _editorScrollController,
-                    child: Column(
-                      children: List.generate(repeatCount, (index) {
-                        return Stack(
-                          children: [
-                            _selectedBackground != null
+                    child: Stack(
+                      children: [
+                        // Background column
+                        Column(
+                          children: List.generate(repeatCount, (index) {
+                            return _selectedBackground != null
                                 ? Image.asset(
                                     _selectedBackground!,
                                     width: screenWidth,
@@ -212,52 +299,59 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                                     width: screenWidth,
                                     height: backgroundHeight,
                                     color: CustomTheme.neutral100,
-                                  ),
-                            if (index == 0)
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 16, vertical: 4),
-                                child: TextField(
-                                  controller: _titleController,
-                                  decoration: InputDecoration(
-                                    hintText: '제목을 입력하세요!',
-                                    border: InputBorder.none,
-                                    hintStyle: TextStyle(
-                                      color: CustomTheme.neutral200,
-                                      fontSize: 20,
-                                    ),
-                                  ),
-                                  style: const TextStyle(
+                                  );
+                          }),
+                        ),
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 4),
+                              child: TextField(
+                                controller: _titleController,
+                                maxLength: 40, // 입력 최대 길이
+                                buildCounter: (_, // 카운터 숨기기
+                                        {required currentLength,
+                                        required isFocused,
+                                        maxLength}) =>
+                                    null,
+                                textAlign: TextAlign.start,
+                                decoration: InputDecoration(
+                                  hintText: '제목을 입력하세요!',
+                                  border: InputBorder.none,
+                                  hintStyle: TextStyle(
+                                    color: CustomTheme.neutral200,
                                     fontSize: 20,
-                                    fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              ),
-                            if (index == 0)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 56),
-                                child: Divider(
-                                    thickness: 0.5,
-                                    color: CustomTheme.neutral200),
-                              ),
-                            if (index == 0)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 70),
-                                child: QuillEditor(
-                                  focusNode: _editorFocusNode,
-                                  scrollController: _editorScrollController,
-                                  controller: _controller,
-                                  config: QuillEditorConfig(
-                                    padding: const EdgeInsets.all(18),
-                                    autoFocus: true,
-                                    expands: false,
-                                    scrollable: false,
-                                  ),
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
+                            ),
+                            Divider(
+                              // 제목과 에디터 사이의 구분선
+                              thickness: 0.5,
+                              color: CustomTheme.neutral200,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 0),
+                              child: QuillEditor(
+                                focusNode: _editorFocusNode,
+                                scrollController: _editorScrollController,
+                                controller: _controller,
+                                config: QuillEditorConfig(
+                                  padding: const EdgeInsets.all(18),
+                                  autoFocus: true,
+                                  expands: false,
+                                  scrollable: false,
+                                ),
+                              ),
+                            ),
                           ],
-                        );
-                      }),
+                        ),
+                      ],
                     ),
                   );
                 },
@@ -265,7 +359,7 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
             ),
             // 툴바 영역
             const Divider(
-              //앱바와 에디터 사이의 구분선
+              //에디터와 툴바 사이의 구분선
               thickness: 0.5,
               height: 1,
               color: CustomTheme.neutral200,
@@ -282,11 +376,11 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                       isUndo: true,
                       controller: _controller,
                     ),
-                    QuillToolbarHistoryButton(
+                    /*QuillToolbarHistoryButton(
                       // 되돌리기 취소
                       isUndo: false,
                       controller: _controller,
-                    ),
+                    ),*/
                     QuillToolbarToggleStyleButton(
                       // 볼드체
                       controller: _controller,
@@ -332,22 +426,24 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                         });
                       },
                     ),
+                    // 글씨 색상
                     QuillToolbarColorButton(
                       controller: _controller,
                       isBackground: false,
                     ),
+                    // 배경 선택
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8),
                       child: Row(
                         children: [
-                          const Text("배경지"),
+                          const Text("배경"),
                           const SizedBox(width: 4),
                           DropdownButton<String>(
-                            value: _selectedBackground,
+                            value: _selectedBackground ?? '',
                             underline: SizedBox.shrink(),
                             items: _backgroundOptions.map((path) {
                               return DropdownMenuItem(
-                                value: path == '없음' ? null : path,
+                                value: path == '없음' ? '' : path,
                                 child: path == '없음'
                                     ? Container(
                                         width: 24,
@@ -379,7 +475,8 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                             }).toList(),
                             onChanged: (value) {
                               setState(() {
-                                _selectedBackground = value;
+                                _selectedBackground =
+                                    value == '' ? null : value;
                               });
                             },
                           ),
@@ -390,6 +487,7 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                       // 헤더 스타일
                       controller: _controller,
                     ),
+                    // 폰트 크기
                     Container(
                       width: 60,
                       margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -435,12 +533,30 @@ void navigateToBookWriteScreen(BuildContext context, Map<String, dynamic> tpl) {
     PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => BookWriteScreen(
         initialContents: (tpl['contents'] as List).map((e) {
-          print("내용 항목 타입: ${e.runtimeType} 값: $e");
           if (e is Map<String, dynamic> && e.containsKey('insert')) {
-            return e;
+            final insert = e['insert'];
+            final attrs = Map<String, dynamic>.from(e['attributes'] ?? {});
+            if (insert == '\n') {
+              // 줄바꿈에 붙은 인라인 스타일 제거
+              attrs.removeWhere((key, value) =>
+                  key == 'bold' ||
+                  key == 'italic' ||
+                  key == 'underline' ||
+                  key == 'strike' ||
+                  key == 'color' ||
+                  key == 'background');
+            }
+            return {
+              'insert': insert,
+              if (attrs.isNotEmpty) 'attributes': attrs,
+            };
           }
           return {'insert': e.toString()};
         }).toList(),
+        bookTitle: tpl['bookTitle'],
+        bookImage: tpl['bookImage'],
+        author: tpl['author'],
+        category: tpl['category'],
       ),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         final tween = Tween(

@@ -5,18 +5,40 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/book.dart';
 import '../models/logData.dart';
 
-// 내 독서록 목록 호출 (지금은 더미데이터)
+// 내 독서록 목록 호출 API GET 요청
 class MyBookLogService {
-  static Future<List<Book>> fetchDummyBooks() async {
+  static Future<List<LogData>> fetchMyLogs() async {
+    final url = Uri.parse('http://43.202.170.189:3000/book-logs/log');
+
     try {
-      final String response = await rootBundle.loadString('assets/dummy.json');
-      print("Raw dummy.json content loaded");
-      print(response); // Log the JSON content
-      final List<dynamic> data = json.decode(response);
-      return data.map((json) => Book.fromJson(json)).toList();
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization':
+              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImExOTY1MjE1LWRkZDUtNDBlNS04NjZmLTQyNDMxZWE4OGE0ZCIsImlhdCI6MTc0ODc0OTk4MCwiZXhwIjoxNzUxMzQxOTgwfQ.2unp5SCwOVZwpQXX2-cbW1YEM7rttWTORS4W9qR-JaI',
+        },
+      );
+
+      // 디버깅용 로그 from book_service.dart
+      print('Status Code (My Logs): ${response.statusCode}');
+      print('Raw response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        final dynamic rawData = jsonBody['data'];
+        if (rawData is List) {
+          return rawData.map((item) => LogData.fromJson(item)).toList();
+        } else if (rawData is Map<String, dynamic>) {
+          return [LogData.fromJson(rawData)];
+        } else {
+          print("Unexpected type for data: ${rawData.runtimeType}");
+          throw Exception('Invalid data format');
+        }
+      } else {
+        throw Exception('내 독서록 API 실패: ${response.statusCode}');
+      }
     } catch (e) {
-      // 에러 처리
-      print("Error loading dummy books: $e");
+      print("Error fetching my logs: $e");
       return [];
     }
   }
