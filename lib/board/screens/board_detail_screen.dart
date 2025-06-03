@@ -23,7 +23,7 @@ class _BoardDetailScreenState extends State<BoardDetailScreen> {
   bool _isDeleted = false;
 
   final String _token =
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODc0MDIzNSwiZXhwIjoxNzUxMzMyMjM1fQ.99ybKDV8RyubF6esYKqH3JSDpgzJmeN6-CPEIYIYLF4';
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODc1NjAzMywiZXhwIjoxNzUxMzQ4MDMzfQ.X7RpYpkDoii2ucukfeW99k3Xu2ddGvRnEjHw4jgu3hA';
 
   @override
   void initState() {

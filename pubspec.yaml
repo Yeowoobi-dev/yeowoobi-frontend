@@ -13,7 +13,8 @@ dependencies:
   flutter_quill: ^11.2.0
   flutter_quill_extensions: ^11.0.0
   path_provider: ^2.1.1
-  kakao_flutter_sdk_user: ^1.9.7+3
+  kakao_flutter_sdk_user: ^1.9.5
+  shared_preferences: ^2.2.0
   
 dev_dependencies:
   flutter_test:

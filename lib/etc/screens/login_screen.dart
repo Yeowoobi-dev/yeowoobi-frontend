@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _sendTokenToServer(String accessToken) async {
     try {
-      final url = Uri.parse('http://43.202.170.189:3000/auth/kakao/ios');
+      final url = Uri.parse('http://43.202.170.189:3002/auth/kakao/ios');
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -102,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
         'accessToken': accessToken,
       })}');
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200  || response.statusCode == 201) {
         print('서버 로그인 성공: ${response.body}');
         // 바로 닉네임 설정 화면으로 이동
         setState(() {
