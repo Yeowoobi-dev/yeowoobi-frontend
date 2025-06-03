@@ -92,8 +92,8 @@ class _LoginScreenState extends State<LoginScreen> {
         body: jsonEncode({'accessToken': accessToken}),
       );
       print('👉 보낼 데이터: ${jsonEncode({
-        'accessToken': accessToken,
-      })}');
+            'accessToken': accessToken,
+          })}');
 
       if (response.statusCode == 200) {
         print('서버 로그인 성공: ${response.body}');
@@ -159,10 +159,10 @@ class _LoginScreenState extends State<LoginScreen> {
           child: _showIntroductionForm
               ? _buildIntroductionForm(cs, theme)
               : _showKeywordForm
-              ? _buildKeywordSelectionForm(cs, theme)
-              : _showNicknameForm
-              ? _buildNicknameForm(cs, theme)
-              : _buildLoginView(cs, theme),
+                  ? _buildKeywordSelectionForm(cs, theme)
+                  : _showNicknameForm
+                      ? _buildNicknameForm(cs, theme)
+                      : _buildLoginView(cs, theme),
         ),
       ),
     );
@@ -176,7 +176,8 @@ class _LoginScreenState extends State<LoginScreen> {
         Column(
           children: [
             const SizedBox(height: 80),
-            Image.asset('assets/image/fox.png', width: 180, fit: BoxFit.contain),
+            Image.asset('assets/image/fox.png',
+                width: 180, fit: BoxFit.contain),
             const SizedBox(height: 40),
             Text("여우비에 오신 것을\n환영해요 :)",
                 textAlign: TextAlign.center,
@@ -217,7 +218,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 fillColor: Theme.of(context).scaffoldBackgroundColor,
                 border: InputBorder.none,
                 counterText: '',
-                contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
               ),
             ),
             Container(height: 1.5, color: CustomTheme.neutral200),
@@ -233,9 +235,9 @@ class _LoginScreenState extends State<LoginScreen> {
           child: ElevatedButton(
             onPressed: _isValid
                 ? () => setState(() {
-              _showNicknameForm = false;
-              _showKeywordForm = true;
-            })
+                      _showNicknameForm = false;
+                      _showKeywordForm = true;
+                    })
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: _isValid ? cs.primary : Colors.white,
@@ -280,7 +282,7 @@ class _LoginScreenState extends State<LoginScreen> {
               }),
               child: Container(
                 padding:
-                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   color: selected ? cs.tertiary : CustomTheme.neutral100,
                   borderRadius: BorderRadius.circular(20),
@@ -303,17 +305,16 @@ class _LoginScreenState extends State<LoginScreen> {
           child: ElevatedButton(
             onPressed: _selectedKeywords.isNotEmpty
                 ? () => setState(() {
-              _showKeywordForm = false;
-              _showIntroductionForm = true;
-            })
+                      _showKeywordForm = false;
+                      _showIntroductionForm = true;
+                    })
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: _selectedKeywords.isNotEmpty
                   ? cs.primary
                   : cs.secondary.withOpacity(0.3),
-              foregroundColor: _selectedKeywords.isNotEmpty
-                  ? Colors.white
-                  : cs.secondary,
+              foregroundColor:
+                  _selectedKeywords.isNotEmpty ? Colors.white : cs.secondary,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
               elevation: 0,
@@ -361,7 +362,7 @@ class _LoginScreenState extends State<LoginScreen> {
               borderSide: BorderSide(color: CustomTheme.neutral300, width: 2),
               borderRadius: BorderRadius.circular(8),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+            //contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
           ),
         ),
         const Spacer(),
