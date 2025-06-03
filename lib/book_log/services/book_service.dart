@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/book.dart';
 import '../models/logData.dart';
+import '../models/simpleLogData.dart';
 
 // 내 독서록 목록 호출 API GET 요청
 class MyBookLogService {
-  static Future<List<LogData>> fetchMyLogs() async {
+  static Future<List<SimpleLogData>> fetchMySimpleLogs() async {
     final url = Uri.parse('http://43.202.170.189:3000/book-logs/log');
 
     try {
@@ -25,9 +26,9 @@ class MyBookLogService {
         final jsonBody = json.decode(response.body);
         final dynamic rawData = jsonBody['data'];
         if (rawData is List) {
-          return rawData.map((item) => LogData.fromJson(item)).toList();
+          return rawData.map((item) => SimpleLogData.fromJson(item)).toList();
         } else if (rawData is Map<String, dynamic>) {
-          return [LogData.fromJson(rawData)];
+          return [SimpleLogData.fromJson(rawData)];
         } else {
           print("Unexpected type for data: ${rawData.runtimeType}");
           throw Exception('Invalid data format');
@@ -89,7 +90,7 @@ class NewBookLogSPost {
     final url = Uri.parse('http://43.202.170.189:3000/book-logs/log');
 
     print('POST URL: $url');
-    print('Sending logData to server: ${jsonEncode(logData)}');
+    print('jsonEncode(logData) to server: ${jsonEncode(logData)}');
 
     final response = await http.post(
       url,
@@ -108,6 +109,38 @@ class NewBookLogSPost {
       print('독서록 작성 POST 실패: ${response.statusCode}');
       print('Response body: ${response.body}');
       throw Exception('POST 실패');
+    }
+  }
+}
+
+// 단일 독서록 조회 API GET 요청
+class BookLogDetailService {
+  static Future<LogData?> fetchLogDetail(int id) async {
+    final url = Uri.parse('http://43.202.170.189:3000/book-logs/log/$id');
+    print('Fetching log detail from URL: $url');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization':
+              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImExOTY1MjE1LWRkZDUtNDBlNS04NjZmLTQyNDMxZWE4OGE0ZCIsImlhdCI6MTc0ODc0OTk4MCwiZXhwIjoxNzUxMzQxOTgwfQ.2unp5SCwOVZwpQXX2-cbW1YEM7rttWTORS4W9qR-JaI',
+        },
+      );
+
+      print('Status Code (Log Detail): ${response.statusCode}');
+      print('Raw response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        final Map<String, dynamic> data = jsonBody['data'];
+        return LogData.fromJson(data);
+      } else {
+        throw Exception('단일 독서록 API 실패: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Error fetching log detail: $e");
+      return null;
     }
   }
 }

@@ -1,13 +1,15 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
+import 'package:yeowoobi_frontend/book_log/services/book_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
+import 'package:yeowoobi_frontend/book_log/models/logData.dart';
 
 class DetailScreen extends StatefulWidget {
-  const DetailScreen({super.key});
+  final int logId;
+  const DetailScreen({super.key, required this.logId});
 
   @override
   State<DetailScreen> createState() => _DetailScreenState();
@@ -26,24 +28,16 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<void> _loadLogData() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final file = File('${directory.path}/log.json');
+    final logDetail = await BookLogDetailService.fetchLogDetail(widget.logId);
+    print(
+        'logDetail: id=${logDetail?.id}, title=${logDetail?.title}, content length=${logDetail?.content.length}');
 
-    if (await file.exists()) {
-      final jsonString = await file.readAsString();
-      final data = jsonDecode(jsonString);
-      setState(() {
-        title = data['title'] ?? '';
-        final rawContents = data['contents'];
-        contents = (rawContents is List && rawContents.isNotEmpty)
-            ? rawContents
-            : [
-                {"insert": "\n"}
-              ];
-        backgroundImage = data['background'];
-        isLoaded = true;
-      });
-    }
+    setState(() {
+      title = logDetail!.title;
+      contents = logDetail!.content;
+      backgroundImage = logDetail!.background;
+      isLoaded = true;
+    });
   }
 
   @override
@@ -88,24 +82,29 @@ class _DetailScreenState extends State<DetailScreen> {
               child: SingleChildScrollView(
                 child: Stack(
                   children: [
-                    Column(
-                      children: List.generate(repeatCount, (index) {
-                        return backgroundImage != null
-                            ? Image.asset(
-                                backgroundImage!,
-                                width: screenWidth,
-                                height: backgroundHeight,
-                                fit: BoxFit.cover,
-                              )
-                            : Container(
-                                width: screenWidth,
-                                height: backgroundHeight,
-                                color: CustomTheme.neutral100,
-                              );
-                      }),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 1),
+                      child: Column(
+                        children: List.generate(repeatCount, (index) {
+                          return (backgroundImage != null &&
+                                  backgroundImage!.isNotEmpty)
+                              ? Image.asset(
+                                  backgroundImage!,
+                                  width: screenWidth,
+                                  height: backgroundHeight,
+                                  fit: BoxFit.cover,
+                                )
+                              : Container(
+                                  width: screenWidth,
+                                  height: backgroundHeight,
+                                  color: CustomTheme.neutral100,
+                                );
+                        }),
+                      ),
                     ),
                     Column(
                       children: [
+                        const SizedBox(height: 10),
                         Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 4),

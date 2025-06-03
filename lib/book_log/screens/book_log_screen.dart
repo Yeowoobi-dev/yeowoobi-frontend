@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
-import 'package:yeowoobi_frontend/book_log/models/logData.dart';
+import 'package:yeowoobi_frontend/book_log/models/simpleLogData.dart';
 import 'package:yeowoobi_frontend/book_log/services/book_service.dart';
 import 'package:yeowoobi_frontend/book_log/screens/book_select_screen.dart';
+import 'package:yeowoobi_frontend/book_log/screens/detail_screen.dart';
 import 'package:yeowoobi_frontend/recommendation/screens/book_recommend_screen.dart';
 
 class BookLogScreen extends StatefulWidget {
@@ -18,15 +19,15 @@ class _BookLogScreenState extends State<BookLogScreen> {
   String _selectedSort = '최신순';
   bool isGridView = false;
 
-  List<LogData>? _filteredLogs;
-  List<LogData> _allLogs = [];
+  List<SimpleLogData>? _filteredLogs;
+  List<SimpleLogData> _allLogs = [];
 
-  Future<List<LogData>>? _logFuture;
+  Future<List<SimpleLogData>>? _logFuture;
 
   @override
   void initState() {
     super.initState();
-    _logFuture = MyBookLogService.fetchMyLogs().then((logs) {
+    _logFuture = MyBookLogService.fetchMySimpleLogs().then((logs) {
       _allLogs = logs;
       return logs;
     });
@@ -39,7 +40,7 @@ class _BookLogScreenState extends State<BookLogScreen> {
   }
 
   Future<void> _refreshBooks() async {
-    final logs = await MyBookLogService.fetchMyLogs();
+    final logs = await MyBookLogService.fetchMySimpleLogs();
     setState(() {
       _allLogs = logs;
       _logFuture = Future.value(logs);
@@ -47,7 +48,7 @@ class _BookLogScreenState extends State<BookLogScreen> {
     });
   }
 
-  List<LogData> _filterLogs(List<LogData> logs, String query) {
+  List<SimpleLogData> _filterLogs(List<SimpleLogData> logs, String query) {
     final lowerQuery = query.toLowerCase();
     return logs.where((log) {
       return log.bookTitle.toLowerCase().contains(lowerQuery) ||
@@ -142,15 +143,18 @@ class _BookLogScreenState extends State<BookLogScreen> {
             const SizedBox(height: 5),
 
             // 3. 정렬 및 보기 방식 선택
-            FutureBuilder<List<LogData>>(
+            FutureBuilder<List<SimpleLogData>>(
               future: _logFuture ?? Future.value([]),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return const Center(child: Text('데이터 로딩 실패'));
-                } else
-                  (!snapshot.hasData || snapshot.data!.isEmpty);
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(
+                      child:
+                          Text('아직 독서록이 없어요!', style: TextStyle(fontSize: 18)));
+                }
                 final logs = snapshot.data!;
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -220,7 +224,7 @@ class _BookLogScreenState extends State<BookLogScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: RefreshIndicator(
                   onRefresh: _refreshBooks,
-                  child: FutureBuilder<List<LogData>>(
+                  child: FutureBuilder<List<SimpleLogData>>(
                     future: _logFuture ?? Future.value([]),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -288,42 +292,54 @@ class _BookLogScreenState extends State<BookLogScreen> {
   }
 
   // 리스트 뷰
-  Widget _buildListView(List<LogData> logs) {
+  Widget _buildListView(List<SimpleLogData> logs) {
     return ListView.separated(
       physics: const AlwaysScrollableScrollPhysics(),
       itemCount: logs.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final log = logs[index];
-        return Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 6,
-                offset: Offset(2, 4),
+        return GestureDetector(
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => DetailScreen(logId: log.id),
               ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Image.network(log.bookImage,
-                  width: 50, height: 70, fit: BoxFit.cover), // 리스트에서 이미지 크기 고정
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(log.bookTitle,
-                        style: TextStyle(fontWeight: FontWeight.bold)),
-                    Text(log.author, style: TextStyle(color: Colors.grey[600]))
-                  ],
+            );
+          },
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 6,
+                  offset: Offset(2, 4),
                 ),
-              )
-            ],
+              ],
+            ),
+            child: Row(
+              children: [
+                Image.network(log.bookImage,
+                    width: 50,
+                    height: 70,
+                    fit: BoxFit.cover), // 리스트에서 이미지 크기 고정
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(log.bookTitle,
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text(log.author,
+                          style: TextStyle(color: Colors.grey[600]))
+                    ],
+                  ),
+                )
+              ],
+            ),
           ),
         );
       },
@@ -331,7 +347,7 @@ class _BookLogScreenState extends State<BookLogScreen> {
   }
 
   // 그리드 뷰
-  Widget _buildGridView(List<LogData> logs) {
+  Widget _buildGridView(List<SimpleLogData> logs) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       decoration: BoxDecoration(
@@ -357,47 +373,56 @@ class _BookLogScreenState extends State<BookLogScreen> {
         ),
         itemBuilder: (context, index) {
           final log = logs[index];
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: 100,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(log.bookImage, fit: BoxFit.cover),
+          return GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => DetailScreen(logId: log.id),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: SizedBox(
-                  width: double.infinity,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        log.bookTitle,
-                        maxLines: 2, // 제목 최대 2줄
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.left,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          height: 1.2, // 줄 간격 설정 (기본값보다 작게)
-                        ),
-                      ),
-                      Text(
-                        log.author,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.left,
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                    ],
+              );
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 100,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(log.bookImage, fit: BoxFit.cover),
                   ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          log.bookTitle,
+                          maxLines: 2, // 제목 최대 2줄
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            height: 1.2, // 줄 간격 설정 (기본값보다 작게)
+                          ),
+                        ),
+                        Text(
+                          log.author,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.left,
+                          style:
+                              const TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),
