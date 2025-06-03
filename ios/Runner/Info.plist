@@ -45,5 +45,24 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<key>CFBundleURLTypes</key>
+	<array>
+	  <dict>
+	    <key>CFBundleURLSchemes</key>
+	    <array>
+	      <string>kakao1634174a8acc8c329f268e93b42f0f0b</string>
+	    </array>
+	  </dict>
+	</array>
+
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+	  <string>kakao1634174a8acc8c329f268e93b42f0f0b</string>
+	  <string>kakaokompassauth</string>
+	  <string>storykompassauth</string>
+	  <string>kakaolink</string>
+	  <string>kakaotalk-5.9.7</string>
+	</array>
 </dict>
 </plist>

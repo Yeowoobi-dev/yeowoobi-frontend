@@ -1,3 +1,4 @@
+// free_board_screen.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -23,7 +24,7 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
 
   final String _apiUrl = 'http://43.202.170.189:3000/community/posts';
   final String _token =
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0NzcyMzE0MiwiZXhwIjoxNzQ3NzI2NzQyfQ.TKZy52YHlxL8qxarwxxYohDSAL8sxYtpitwuUnLQrx4'; // 전체 토큰으로 교체
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODc0MDIzNSwiZXhwIjoxNzUxMzMyMjM1fQ.99ybKDV8RyubF6esYKqH3JSDpgzJmeN6-CPEIYIYLF4';
 
   @override
   void initState() {
@@ -85,12 +86,15 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
 
       if (index == 0) {
         posts.sort((a, b) =>
-            DateTime.parse(b['createdAt'])
-                .compareTo(DateTime.parse(a['createdAt'])));
+            DateTime.parse(b['createdAt']).compareTo(DateTime.parse(a['createdAt'])));
       } else {
         posts.sort((a, b) => b['likesCount'].compareTo(a['likesCount']));
       }
     });
+  }
+
+  Color _likeColor() {
+    return CustomTheme.neutral400; // ✅ 항상 고정된 검정색
   }
 
   @override
@@ -186,13 +190,28 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
                     itemBuilder: (context, index) {
                       final post = posts[index];
                       return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (_) => BoardDetailScreen(post: post),
                             ),
                           );
+                          if (result != null) {
+                            if (result is Map && result['deletedPostId'] != null) {
+                              setState(() {
+                                posts.removeWhere((p) => p['id'] == result['deletedPostId']);
+                              });
+                            } else if (result is Map) {
+                              setState(() {
+                                posts[index]['commentsCount'] = result['commentsCount'];
+                                posts[index]['likesCount'] = result['likesCount'];
+                                posts[index]['isLiked'] = result['isLiked'];
+                              });
+                            } else {
+                              await _loadPosts();
+                            }
+                          }
                         },
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -230,13 +249,23 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
                                   const SizedBox(height: 8),
                                   Row(
                                     children: [
-                                      Image.asset('assets/icons/heart.png',
-                                          width: 18),
+                                      Image.asset(
+                                        'assets/icons/heart.png',
+                                        width: 18,
+                                        color: _likeColor(), // ✅ 고정된 색
+                                      ),
                                       const SizedBox(width: 4),
-                                      Text('${post['likesCount']}'),
+                                      Text(
+                                        '${post['likesCount']}',
+                                        style: TextStyle(
+                                          color: _likeColor(), // ✅ 고정된 색
+                                        ),
+                                      ),
                                       const SizedBox(width: 12),
-                                      Image.asset('assets/icons/chat.png',
-                                          width: 18),
+                                      Image.asset(
+                                        'assets/icons/chat.png',
+                                        width: 18,
+                                      ),
                                       const SizedBox(width: 4),
                                       Text('${post['commentsCount']}'),
                                     ],
@@ -265,7 +294,7 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
                   builder: (_) => const BoardCreateScreen(),
                 ),
               );
-              _loadPosts(); // 작성 후 다시 불러오기
+              _loadPosts();
             },
             child: AnimatedScale(
               scale: 1.0,

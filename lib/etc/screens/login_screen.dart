@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
 
@@ -17,6 +19,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final TextEditingController _nicknameController = TextEditingController();
   final TextEditingController _introductionController = TextEditingController();
+  final FocusNode _nicknameFocusNode = FocusNode();
+  final FocusNode _introductionFocusNode = FocusNode();
 
   bool _isValid = false;
   final Set<String> _selectedKeywords = {};
@@ -41,7 +45,6 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  // 닉네임 유효성 검사
   void _validate() {
     final text = _nicknameController.text.trim();
     final isValidFormat = RegExp(r'^[가-힣a-zA-Z0-9]+$').hasMatch(text);
@@ -54,11 +57,63 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _nicknameController.dispose();
     _introductionController.dispose();
+    _nicknameFocusNode.dispose();
+    _introductionFocusNode.dispose();
     super.dispose();
   }
 
-  final FocusNode _nicknameFocusNode = FocusNode();
-  final FocusNode _introductionFocusNode = FocusNode();
+  Future<void> _loginWithKakao() async {
+    try {
+      bool isInstalled = await isKakaoTalkInstalled();
+      OAuthToken token;
+
+      if (isInstalled) {
+        token = await UserApi.instance.loginWithKakaoTalk();
+      } else {
+        token = await UserApi.instance.loginWithKakaoAccount();
+      }
+
+      print('카카오 엑세스 토큰: ${token.accessToken}');
+      await _sendTokenToServer(token.accessToken);
+    } catch (e) {
+      print('카카오 로그인 실패: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('카카오 로그인 실패: $e')),
+      );
+    }
+  }
+
+  Future<void> _sendTokenToServer(String accessToken) async {
+    try {
+      final url = Uri.parse('http://43.202.170.189:3000/auth/kakao/ios');
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'accessToken': accessToken}),
+      );
+      print('👉 보낼 데이터: ${jsonEncode({
+        'accessToken': accessToken,
+      })}');
+
+      if (response.statusCode == 200) {
+        print('서버 로그인 성공: ${response.body}');
+        // 바로 닉네임 설정 화면으로 이동
+        setState(() {
+          _showNicknameForm = true;
+        });
+      } else {
+        print('서버 로그인 실패: ${response.statusCode} - ${response.body}');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('서버 로그인 실패: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      print('서버 로그인 실패: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('서버 로그인 실패: $e')),
+      );
+    }
+  }
 
   bool get _showFormAppBar =>
       _showNicknameForm || _showKeywordForm || _showIntroductionForm;
@@ -104,10 +159,10 @@ class _LoginScreenState extends State<LoginScreen> {
           child: _showIntroductionForm
               ? _buildIntroductionForm(cs, theme)
               : _showKeywordForm
-                  ? _buildKeywordSelectionForm(cs, theme)
-                  : _showNicknameForm
-                      ? _buildNicknameForm(cs, theme)
-                      : _buildLoginView(cs, theme),
+              ? _buildKeywordSelectionForm(cs, theme)
+              : _showNicknameForm
+              ? _buildNicknameForm(cs, theme)
+              : _buildLoginView(cs, theme),
         ),
       ),
     );
@@ -121,8 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
         Column(
           children: [
             const SizedBox(height: 80),
-            Image.asset('assets/image/fox.png',
-                width: 180, fit: BoxFit.contain),
+            Image.asset('assets/image/fox.png', width: 180, fit: BoxFit.contain),
             const SizedBox(height: 40),
             Text("여우비에 오신 것을\n환영해요 :)",
                 textAlign: TextAlign.center,
@@ -133,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ],
         ),
         GestureDetector(
-          onTap: () => setState(() => _showNicknameForm = true),
+          onTap: _loginWithKakao,
           child: Image.asset('assets/image/kakao_login_large_wide.png',
               width: double.infinity, fit: BoxFit.contain),
         ),
@@ -163,8 +217,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 fillColor: Theme.of(context).scaffoldBackgroundColor,
                 border: InputBorder.none,
                 counterText: '',
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
               ),
             ),
             Container(height: 1.5, color: CustomTheme.neutral200),
@@ -180,9 +233,9 @@ class _LoginScreenState extends State<LoginScreen> {
           child: ElevatedButton(
             onPressed: _isValid
                 ? () => setState(() {
-                      _showNicknameForm = false;
-                      _showKeywordForm = true;
-                    })
+              _showNicknameForm = false;
+              _showKeywordForm = true;
+            })
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: _isValid ? cs.primary : Colors.white,
@@ -227,7 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
               }),
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   color: selected ? cs.tertiary : CustomTheme.neutral100,
                   borderRadius: BorderRadius.circular(20),
@@ -250,17 +303,17 @@ class _LoginScreenState extends State<LoginScreen> {
           child: ElevatedButton(
             onPressed: _selectedKeywords.isNotEmpty
                 ? () => setState(() {
-                      _showKeywordForm = false;
-                      _showIntroductionForm = true;
-                    })
+              _showKeywordForm = false;
+              _showIntroductionForm = true;
+            })
                 : null,
             style: ElevatedButton.styleFrom(
               backgroundColor: _selectedKeywords.isNotEmpty
                   ? cs.primary
-                  : cs.secondary.withValues(alpha: (0.3 * 255)),
+                  : cs.secondary.withOpacity(0.3),
               foregroundColor: _selectedKeywords.isNotEmpty
                   ? Colors.white
-                  : CustomTheme.neutral200,
+                  : cs.secondary,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10)),
               elevation: 0,
@@ -308,6 +361,7 @@ class _LoginScreenState extends State<LoginScreen> {
               borderSide: BorderSide(color: CustomTheme.neutral300, width: 2),
               borderRadius: BorderRadius.circular(8),
             ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
           ),
         ),
         const Spacer(),

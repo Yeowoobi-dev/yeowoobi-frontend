@@ -15,8 +15,8 @@ dependencies:
   path_provider: ^2.1.1
   http: ^0.13.6
   flutter_dotenv: ^5.2.1
-
-dev_dependencies:
+  kakao_flutter_sdk_user: ^1.9.7+3
+  dev_dependencies:
   flutter_test:
     sdk: flutter
 
