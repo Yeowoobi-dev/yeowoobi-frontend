@@ -43,6 +43,37 @@ class MyBookLogService {
   }
 }
 
+// 독서록 삭제 DELETE 요청
+class BookLogDeleteService {
+  static Future<bool> deleteLog(int logId) async {
+    final url = Uri.parse('http://43.202.170.189:3000/book-logs/log/$logId');
+    print('Deleting log at URL: $url');
+
+    try {
+      final response = await http.delete(
+        url,
+        headers: {
+          'Authorization':
+              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImExOTY1MjE1LWRkZDUtNDBlNS04NjZmLTQyNDMxZWE4OGE0ZCIsImlhdCI6MTc0ODc0OTk4MCwiZXhwIjoxNzUxMzQxOTgwfQ.2unp5SCwOVZwpQXX2-cbW1YEM7rttWTORS4W9qR-JaI',
+        },
+      );
+
+      print('Delete response status: ${response.statusCode}');
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        print('독서록 삭제 성공');
+        return true;
+      } else {
+        print('독서록 삭제 실패: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print("Error deleting log: $e");
+      return false;
+    }
+  }
+}
+
 // 도서 검색 API GET 요청
 class NewBookService {
   static Future<List<Book>> fetchNewBooks(String keyword) async {

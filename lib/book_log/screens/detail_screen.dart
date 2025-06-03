@@ -4,6 +4,7 @@ import 'package:yeowoobi_frontend/book_log/services/book_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
+import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:yeowoobi_frontend/book_log/models/logData.dart';
 
@@ -73,6 +74,39 @@ class _DetailScreenState extends State<DetailScreen> {
                     onPressed: () => Navigator.pop(context),
                   ),
                   const Spacer(),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () async {
+                      final confirmed = await showDialog<bool>(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('독서록 삭제'),
+                          content: const Text('독서록을 삭제하시겠습니까?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, true),
+                              child: const Text('예'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(context, false),
+                              child: const Text('아니오'),
+                            ),
+                          ],
+                        ),
+                      );
+
+                      if (confirmed == true) {
+                        await BookLogDeleteService.deleteLog(widget.logId);
+                        if (context.mounted) {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                                builder: (_) => const HomeScreen()),
+                            (route) => false,
+                          );
+                        }
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
