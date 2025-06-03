@@ -48,7 +48,7 @@ class BookRecommendScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                 ),
-                Image.asset('assets/image/yeowoong1.png', height: 460),
+                Image.asset('assets/gif/q3.gif', height: 460),
                 const SizedBox(height: 40),
                 SizedBox(
                   width: 200,
