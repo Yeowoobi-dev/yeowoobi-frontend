@@ -32,7 +32,17 @@ class MyApp extends StatelessWidget {
         Locale('en'),
         Locale('ko'),
       ],
-      home: const SplashScreen(),
+      //  iphone 기준으로 화면 크기 제한
+      builder: (context, child) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+                maxWidth: 430, maxHeight: 932), // iPhone 14 Pro Max 기준
+            child: child ?? const SizedBox.shrink(),
+          ),
+        );
+      },
+      home: const HomeScreen(),
     );
   }
 }
