@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
 import 'package:yeowoobi_frontend/etc/screens/login_screen.dart';
 import 'package:yeowoobi_frontend/etc/screens/splash_screen.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
       theme: CustomTheme.lightTheme,
       darkTheme: CustomTheme.darkTheme,
       themeMode: ThemeMode.system,
-      title: 'Yeowoobi', // ✅ title 하나만 남김
+      title: 'Yeowoobi',
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -41,7 +42,7 @@ class MyApp extends StatelessWidget {
           ),
         );
       },
-      home: SplashScreen(),
+      home: HomeScreen(),
     );
   }
 }
