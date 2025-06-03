@@ -14,6 +14,9 @@ class TemplateService {
       if (await file.exists()) {
         final String response = await file.readAsString();
         final List<dynamic> data = json.decode(response);
+        for (var tpl in data) {
+          print("템플릿 컨텐츠 타입 확인: ${tpl['contents'].runtimeType}");
+        }
         return data.map((json) => Template.fromJson(json)).toList();
       } else {
         // 최초 실행 시 assets 파일을 복사
@@ -21,6 +24,9 @@ class TemplateService {
             await rootBundle.loadString('assets/template.json');
         await file.writeAsString(defaultData);
         final List<dynamic> data = json.decode(defaultData);
+        for (var tpl in data) {
+          print("템플릿 컨텐츠 타입 확인: ${tpl['contents'].runtimeType}");
+        }
         return data.map((json) => Template.fromJson(json)).toList();
       }
     } catch (e) {

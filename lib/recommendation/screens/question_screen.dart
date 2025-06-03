@@ -41,7 +41,7 @@ class _BookQuestionScreenState extends State<QuestionScreen> {
       _selectedIndex = index;
     });
 
-    Future.delayed(const Duration(milliseconds: 300), () {
+    Future.delayed(const Duration(milliseconds: 300), () async {
       setState(() {
         _answers.add(answer);
       });
@@ -53,7 +53,9 @@ class _BookQuestionScreenState extends State<QuestionScreen> {
         });
       } else {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => LoadingScreen()),
+          MaterialPageRoute(
+            builder: (context) => LoadingScreen(_answers),
+          ),
         );
       }
     });

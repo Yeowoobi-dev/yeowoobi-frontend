@@ -25,31 +25,24 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isValid = false;
   final Set<String> _selectedKeywords = {};
 
-  final List<String> _keywords = [
-    '정치/사회',
-    '언론/미디어',
-    '영업',
-    '마케팅/홍보',
-    '법률',
-    '의료/복지',
-    '문화/예술',
-    '소설',
-    'SF/판타지',
-    '역사',
-    'IT/과학',
-    '자기 개발',
-    '아웃도어/레저',
-    '교육',
-    '육아',
-    '경제/금융',
-    '스릴러/공포',
-    '여우비',
-  ];
+  List<String> _keywords = [];
 
   @override
   void initState() {
     super.initState();
     _nicknameController.addListener(_validate);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadKeywords();
+    });
+  }
+
+  Future<void> _loadKeywords() async {
+    final String data = await DefaultAssetBundle.of(context)
+        .loadString('assets/book_category.json');
+    final List<dynamic> jsonResult = jsonDecode(data);
+    setState(() {
+      _keywords = jsonResult.map((e) => e['name'] as String).toList();
+    });
   }
 
   void _validate() {
@@ -122,6 +115,23 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  bool get _showFormAppBar =>
+      _showNicknameForm || _showKeywordForm || _showIntroductionForm;
+
+  void _handleBackNavigation() {
+    setState(() {
+      if (_showIntroductionForm) {
+        _showIntroductionForm = false;
+        _showKeywordForm = true;
+      } else if (_showKeywordForm) {
+        _showKeywordForm = false;
+        _showNicknameForm = true;
+      } else if (_showNicknameForm) {
+        _showNicknameForm = false;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -129,6 +139,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: _showFormAppBar
+          ? AppBar(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              elevation: 0,
+              leading: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: IconButton(
+                  icon:
+                      Icon(Icons.arrow_back_ios, color: CustomTheme.neutral200),
+                  onPressed: _handleBackNavigation,
+                ),
+              ),
+            )
+          : null,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 24.0),
@@ -176,13 +200,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Transform.translate(
-          offset: const Offset(-8, 0),
-          child: IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: cs.primary),
-            onPressed: () => setState(() => _showNicknameForm = false),
-          ),
-        ),
         Text("닉네임을\n설정해주세요.", style: theme.textTheme.headlineMedium),
         const SizedBox(height: 16),
         Text("여우비가 당신을 어떻게 부르면 될까요?", style: theme.textTheme.bodyMedium),
@@ -244,16 +261,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Transform.translate(
-          offset: const Offset(-8, 0),
-          child: IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: cs.primary),
-            onPressed: () => setState(() {
-              _showKeywordForm = false;
-              _showNicknameForm = true;
-            }),
-          ),
-        ),
         Text("${_nicknameController.text}님의 독서취향을\n알고싶어요!",
             style: theme.textTheme.headlineMedium),
         const SizedBox(height: 12),
@@ -261,7 +268,7 @@ class _LoginScreenState extends State<LoginScreen> {
             style: theme.textTheme.bodyMedium),
         const SizedBox(height: 24),
         Wrap(
-          spacing: 8,
+          spacing: 6,
           runSpacing: 12,
           children: _keywords.map((keyword) {
             final selected = _selectedKeywords.contains(keyword);
@@ -328,16 +335,6 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Transform.translate(
-          offset: const Offset(-8, 0),
-          child: IconButton(
-            icon: Icon(Icons.arrow_back_ios, color: cs.primary),
-            onPressed: () => setState(() {
-              _showIntroductionForm = false;
-              _showKeywordForm = true;
-            }),
-          ),
-        ),
         Text("${_nicknameController.text}님이 \n궁금해요!",
             style: theme.textTheme.headlineMedium),
         const SizedBox(height: 12),
@@ -353,8 +350,17 @@ class _LoginScreenState extends State<LoginScreen> {
             hintText: '소개글을 입력하세요',
             filled: true,
             fillColor: Theme.of(context).scaffoldBackgroundColor,
-            border: InputBorder.none,
             counterText: '',
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: CustomTheme.neutral200),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: CustomTheme.neutral300, width: 2),
+              borderRadius: BorderRadius.circular(8),
+            ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 12),
           ),
         ),

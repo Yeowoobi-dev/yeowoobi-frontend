@@ -13,9 +13,10 @@ dependencies:
   flutter_quill: ^11.2.0
   flutter_quill_extensions: ^11.0.0
   path_provider: ^2.1.1
+  http: ^0.13.6
+  flutter_dotenv: ^5.2.1
   kakao_flutter_sdk_user: ^1.9.7+3
-  
-dev_dependencies:
+  dev_dependencies:
   flutter_test:
     sdk: flutter
 
@@ -37,5 +38,6 @@ flutter:
      - assets/new.json
      - assets/template.json
      - assets/questions.json
+     - assets/book_category.json
      - lib/board/free_board_dummy.json
      - lib/sns/sns_dummy.json

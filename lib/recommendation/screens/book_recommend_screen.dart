@@ -49,7 +49,7 @@ class BookRecommendScreen extends StatelessWidget {
                   ),
                 ),
                 Image.asset('assets/image/yeowoong1.png', height: 460),
-                const SizedBox(height: 60),
+                const SizedBox(height: 40),
                 SizedBox(
                   width: 200,
                   height: 50,
