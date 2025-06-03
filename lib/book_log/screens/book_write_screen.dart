@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:yeowoobi_frontend/book_log/services/book_service.dart';
+import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:path/path.dart' as p;
@@ -35,6 +36,7 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
   final FocusNode _editorFocusNode = FocusNode();
   final TextEditingController _titleController = TextEditingController();
   final ScrollController _editorScrollController = ScrollController();
+  final TextEditingController _reviewController = TextEditingController();
   double? _currentFontSize;
   Attribute<dynamic> _currentAlignment = Attribute.leftAlignment;
   IconData _currentAlignmentIcon = Icons.format_align_left;
@@ -50,15 +52,20 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
     print('Author: ${widget.author}');
     print('Image URL: ${widget.bookImage}');
     print('Category: ${widget.category}');
-    if (widget.initialContents != null &&
-        widget.initialContents!.isNotEmpty &&
-        Delta.fromJson(widget.initialContents!).isNotEmpty) {
-      final delta = Delta.fromJson(widget.initialContents!);
-      _controller = QuillController(
-        document: Document.fromDelta(delta),
-        selection: const TextSelection.collapsed(offset: 0),
-      );
-    } else {
+    try {
+      if (widget.initialContents != null &&
+          widget.initialContents!.isNotEmpty &&
+          Delta.fromJson(widget.initialContents!).isNotEmpty) {
+        final delta = Delta.fromJson(widget.initialContents!);
+        _controller = QuillController(
+          document: Document.fromDelta(delta),
+          selection: const TextSelection.collapsed(offset: 0),
+        );
+      } else {
+        _controller = QuillController.basic();
+      }
+    } catch (e) {
+      print("Delta parsing error: $e");
       _controller = QuillController.basic();
     }
     _titleController.addListener(() {
@@ -95,6 +102,7 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
     _editorFocusNode.dispose();
     _titleController.dispose();
     _editorScrollController.dispose();
+    _reviewController.dispose();
     super.dispose();
   }
 
@@ -115,7 +123,6 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                     padding: const EdgeInsets.only(left: 0.0),
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back_ios),
-                      // onPressed: () => Navigator.pop(context).pop(),
                       onPressed: () {
                         showDialog(
                           context: context,
@@ -129,17 +136,17 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                                 TextButton(
                                   onPressed: () {
                                     Navigator.of(context).pop();
-                                    Navigator.of(context).pop();
-                                    Navigator.of(context).pop(); // 저장 안 하고 나가기
+                                    Navigator.of(context)
+                                        .popUntil((route) => route.isFirst);
                                   },
                                   child: const Text('작성취소'),
                                 ),
                                 TextButton(
                                   onPressed: () {
                                     // 임시 저장 로직 추가 필요
-                                    Navigator.of(context).pop(); // 닫기
-                                    Navigator.of(context).popUntil(
-                                        (route) => route.isFirst); // 홈화면으로 이동
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context)
+                                        .popUntil((route) => route.isFirst);
                                   },
                                   child: const Text('임시저장'),
                                 ),
@@ -178,8 +185,6 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                     // 저장 버튼
                     icon: const Icon(Icons.save),
                     onPressed: () async {
-                      final TextEditingController _reviewController =
-                          TextEditingController();
                       final result = await showDialog<String>(
                         context: context,
                         builder: (BuildContext context) {
@@ -218,11 +223,12 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                             _controller.document.toDelta().toJson();
 
                         print('Delta: $deltaJson'); // 디버깅용 로그
+                        print('text runtimeType: ${deltaJson.runtimeType}');
 
                         final logData = Map<String, dynamic>.from({
                           //'userId': "c1f93145-4ec4-404a-9f6c-991803095d64",
                           'title': title,
-                          'text': deltaJson,
+                          'content': deltaJson,
                           'background': _selectedBackground ?? '',
                           'visibility': result,
                           'review': _reviewController.text.trim(),
@@ -233,23 +239,15 @@ class _BookWriteScreenState extends State<BookWriteScreen> {
                           'createdAt': DateTime.now().toIso8601String(),
                           'updatedAt': DateTime.now().toIso8601String(),
                         });
-/*
-                        // 디버깅 로그 from book_write_screen.dart
-                        print('Saving log data:');
-                        print('Log Title: $title');
-                        print('Review: ${_reviewController.text.trim()}');
-                        print('Background: $_selectedBackground');
-                        print('Author: ${widget.author}');
-                        print('Category: ${widget.category}');
-*/
+
                         // 서버로 저장 (POST)
                         final success =
                             await NewBookLogSPost.postBookLog(logData);
                         if (success) {
-                          Navigator.of(context).push(
+                          Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
-                              builder: (context) => const DetailScreen(),
-                            ),
+                                builder: (_) => const HomeScreen()),
+                            (route) => false,
                           );
                         }
                       }

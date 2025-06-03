@@ -341,13 +341,25 @@ class _BookSelectScreenState extends State<BookSelectScreen> {
                   ),
                   Positioned(
                     top: 0,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        book.imageUrl,
-                        width: 100,
-                        height: 140,
-                        fit: BoxFit.cover,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          book.imageUrl,
+                          width: 100,
+                          height: 140,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                   ),

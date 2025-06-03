@@ -6,7 +6,7 @@ class LogData {
   final int id;
   //final String userId;
   final String title;
-  final List<dynamic> text;
+  final List<dynamic> content;
   final String background;
   final String visibility;
   final String? review;
@@ -23,7 +23,7 @@ class LogData {
     required this.id,
     //required this.userId,
     required this.title,
-    required this.text,
+    required this.content,
     required this.background,
     required this.visibility,
     this.review,
@@ -38,24 +38,26 @@ class LogData {
   });
 
   factory LogData.fromJson(Map<String, dynamic> json) {
-    List<dynamic> parsedText = [];
+    List<dynamic> parsedcontent = [];
     if (json['text'] != null) {
+      // String타입이라면 jsonDecode를 사용하여 파싱
       if (json['text'] is String) {
         try {
-          parsedText = jsonDecode(json['text']);
+          parsedcontent = jsonDecode(json['text']);
         } catch (e) {
           print("Failed to parse text JSON: ${json['text']}");
-          parsedText = [];
+          parsedcontent = [];
         }
+        // List타입이라면 그대로 사용
       } else if (json['text'] is List) {
-        parsedText = json['text'];
+        parsedcontent = json['text'];
       }
     }
     return LogData(
       id: json['id'],
       //userId: json['userId'] ?? '',
-      title: json['title'] ?? '',
-      text: parsedText,
+      title: json['logTitle'] ?? '',
+      content: parsedcontent,
       background: json['background'] ?? '',
       visibility: json['visibility'] ?? '',
       review: json['review'],
