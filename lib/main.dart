@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
+import 'package:yeowoobi_frontend/etc/screens/login_screen.dart';
+import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
 import 'package:yeowoobi_frontend/etc/screens/splash_screen.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
 
 void main() {
-  KakaoSdk.init(nativeAppKey: '1634174a8acc8c329f268e93b42f0f0b');
+  KakaoSdk.init(nativeAppKey: '1634174a8acc8c329f268e93b42f0f0b'); // 네이티브 키
   runApp(const MyApp());
 }
 
@@ -22,6 +24,7 @@ class MyApp extends StatelessWidget {
       title: 'Yeowoobi',
       darkTheme: CustomTheme.darkTheme,
       themeMode: ThemeMode.system,
+      title: 'Yeowoobi',
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -43,6 +46,7 @@ class MyApp extends StatelessWidget {
         );
       },
       home: const HomeScreen(),
+      home: SplashScreen(), // ✅ 닉네임 설정 화면부터
     );
   }
 }

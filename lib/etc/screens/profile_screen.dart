@@ -35,10 +35,10 @@ class ProfileScreen extends StatelessWidget {
                 const Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('박휘윤', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text('익명', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                     SizedBox(height: 6),
                     Text(
-                      '안녕하세요! 판타지 소설을 좋아하는 대학생입니다.',
+                      '소개글입니다',
                       style: TextStyle(fontSize: 14, color: CustomTheme.neutral300),
                     ),
                   ],
@@ -52,7 +52,7 @@ class ProfileScreen extends StatelessWidget {
               spacing: 8,
               runSpacing: 8,
               children: [
-                '#어쩌고', '#저쩌고', '#이게맞나요'
+                '여우비'
               ].map((tag) => Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
@@ -88,65 +88,9 @@ class ProfileScreen extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 더미 독서록 카드 리스트
-            Column(
-              children: List.generate(3, (index) => _dummyBookCard()),
-            )
+
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _dummyBookCard() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(2, 4),
-          )
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 14,
-                  width: 140,
-                  color: CustomTheme.neutral100,
-                  margin: const EdgeInsets.only(bottom: 8),
-                ),
-                Container(
-                  height: 14,
-                  width: 100,
-                  color: CustomTheme.neutral100,
-                  margin: const EdgeInsets.only(bottom: 8),
-                ),
-                Container(
-                  height: 14,
-                  width: 60,
-                  color: CustomTheme.neutral100,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 12),
-          Container(
-            width: 56,
-            height: 70,
-            color: CustomTheme.neutral100,
-          )
-        ],
       ),
     );
   }

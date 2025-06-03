@@ -1,10 +1,12 @@
-// free_board_screen.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:yeowoobi_frontend/board/screens/board_detail_screen.dart';
 import 'package:yeowoobi_frontend/board/screens/board_create_screen.dart';
+
+// ✅ BoardCreateScreen에서 가져온 anonymousPosts 맵
+import 'package:yeowoobi_frontend/board/screens/board_create_screen.dart' show anonymousPosts;
 
 class FreeBoardScreen extends StatefulWidget {
   const FreeBoardScreen({super.key});
@@ -24,7 +26,7 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
 
   final String _apiUrl = 'http://43.202.170.189:3000/community/posts';
   final String _token =
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODc0MDIzNSwiZXhwIjoxNzUxMzMyMjM1fQ.99ybKDV8RyubF6esYKqH3JSDpgzJmeN6-CPEIYIYLF4';
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODc1NjAzMywiZXhwIjoxNzUxMzQ4MDMzfQ.X7RpYpkDoii2ucukfeW99k3Xu2ddGvRnEjHw4jgu3hA';
 
   @override
   void initState() {
@@ -94,7 +96,7 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
   }
 
   Color _likeColor() {
-    return CustomTheme.neutral400; // ✅ 항상 고정된 검정색
+    return CustomTheme.neutral400;
   }
 
   @override
@@ -189,6 +191,11 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
                     ),
                     itemBuilder: (context, index) {
                       final post = posts[index];
+                      final postId = post['id'];
+                      final nickname = (anonymousPosts[postId] == true)
+                          ? '익명'
+                          : (post['authorNickname'] ?? '익명');
+
                       return GestureDetector(
                         onTap: () async {
                           final result = await Navigator.push(
@@ -240,7 +247,7 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    '익명 · ${getRelativeTime(post['createdAt'])}',
+                                    '$nickname · ${getRelativeTime(post['createdAt'])}',
                                     style: const TextStyle(
                                       fontSize: 12,
                                       color: CustomTheme.neutral200,
@@ -252,13 +259,13 @@ class _FreeBoardScreenState extends State<FreeBoardScreen>
                                       Image.asset(
                                         'assets/icons/heart.png',
                                         width: 18,
-                                        color: _likeColor(), // ✅ 고정된 색
+                                        color: _likeColor(),
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
                                         '${post['likesCount']}',
                                         style: TextStyle(
-                                          color: _likeColor(), // ✅ 고정된 색
+                                          color: _likeColor(),
                                         ),
                                       ),
                                       const SizedBox(width: 12),

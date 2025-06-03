@@ -1,51 +1,83 @@
 class SnsPost {
+  final int id;
+  final String createdAt;
+  final String updatedAt;
+  final int version;
+  final String userId;
+  final String logTitle;
+  final List<dynamic> text;
+  final String background;
+  final String? review;
+  final String? category;
   final String bookTitle;
-  final String title;
-  final String uploader;
-  final String time;
-  final int likes;
-  final int comments;
-  final String feedImage;
-  final String coverImage;
-  final String review; // 추가
+  final String bookImage;
+  final String author;
+  final String? publisher;
+  final String visibility;
+  final int likesCount;
+  final int commentsCount;
 
   SnsPost({
+    required this.id,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.version,
+    required this.userId,
+    required this.logTitle,
+    required this.text,
+    required this.background,
+    required this.review,
+    required this.category,
     required this.bookTitle,
-    required this.title,
-    required this.uploader,
-    required this.time,
-    required this.likes,
-    required this.comments,
-    required this.feedImage,
-    required this.coverImage,
-    required this.review, // 추가
+    required this.bookImage,
+    required this.author,
+    required this.publisher,
+    required this.visibility,
+    required this.likesCount,
+    required this.commentsCount,
   });
 
   factory SnsPost.fromJson(Map<String, dynamic> json) {
     return SnsPost(
+      id: json['id'],
+      createdAt: json['createdAt'],
+      updatedAt: json['updatedAt'],
+      version: json['version'],
+      userId: json['userId'],
+      logTitle: json['logTitle'],
+      text: json['text'] ?? [],
+      background: json['background'] ?? '',
+      review: json['review'],
+      category: json['category'],
       bookTitle: json['bookTitle'] ?? '',
-      title: json['title'] ?? '',
-      uploader: json['uploader'] ?? '',
-      time: json['time'] ?? '',
-      likes: json['likes'] ?? 0,
-      comments: json['comments'] ?? 0,
-      feedImage: json['feedImage'] ?? '',
-      coverImage: json['coverImage'] ?? '',
-      review: json['review'] ?? '', // 추가
+      bookImage: json['bookImage'] ?? '',
+      author: json['author'] ?? '',
+      publisher: json['publisher'],
+      visibility: json['visibility'] ?? '',
+      likesCount: json['likesCount'] ?? 0,
+      commentsCount: json['commentsCount'] ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'version': version,
+      'userId': userId,
+      'logTitle': logTitle,
+      'text': text,
+      'background': background,
+      'review': review,
+      'category': category,
       'bookTitle': bookTitle,
-      'title': title,
-      'uploader': uploader,
-      'time': time,
-      'likes': likes,
-      'comments': comments,
-      'feedImage': feedImage,
-      'coverImage': coverImage,
-      'review': review, // 추가
+      'bookImage': bookImage,
+      'author': author,
+      'publisher': publisher,
+      'visibility': visibility,
+      'likesCount': likesCount,
+      'commentsCount': commentsCount,
     };
   }
 }

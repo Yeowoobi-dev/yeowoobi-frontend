@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 
+// ✅ 게시글 ID와 익명 여부를 저장할 맵
+Map<int, bool> anonymousPosts = {};
+
 class BoardCreateScreen extends StatefulWidget {
   const BoardCreateScreen({super.key});
 
@@ -16,7 +19,7 @@ class _BoardCreateScreenState extends State<BoardCreateScreen> {
   bool _isAnonymous = true;
 
   final String _apiUrl = 'http://43.202.170.189:3000/community/posts';
-  final String _token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODc0MDIzNSwiZXhwIjoxNzUxMzMyMjM1fQ.99ybKDV8RyubF6esYKqH3JSDpgzJmeN6-CPEIYIYLF4';
+  final String _token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjA3NjY1MTE4LTcxN2EtNGVjZC05MDZmLTllYWQyYTIyYzkzYiIsImlhdCI6MTc0ODc1NjAzMywiZXhwIjoxNzUxMzQ4MDMzfQ.X7RpYpkDoii2ucukfeW99k3Xu2ddGvRnEjHw4jgu3hA';
 
   @override
   void dispose() {
@@ -46,15 +49,19 @@ class _BoardCreateScreenState extends State<BoardCreateScreen> {
         body: jsonEncode({
           'title': title,
           'content': content,
-          'isAnonymous': _isAnonymous,
+          // ✅ isAnonymous는 서버에 보내지 않는다
         }),
       );
 
       if (response.statusCode == 201) {
+        final createdPostId = jsonDecode(response.body)['data']['id'];
+
+        // ✅ 작성된 postId에 대해 isAnonymous를 local map에 저장
+        anonymousPosts[createdPostId] = _isAnonymous;
+
         Navigator.pop(context);
       } else {
-        final message =
-            jsonDecode(response.body)['message'] ?? '알 수 없는 오류가 발생했습니다.';
+        final message = jsonDecode(response.body)['message'] ?? '알 수 없는 오류가 발생했습니다.';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('작성 실패: $message')),
         );
@@ -108,11 +115,9 @@ class _BoardCreateScreenState extends State<BoardCreateScreen> {
                   maxLines: null,
                   expands: true,
                   keyboardType: TextInputType.multiline,
-                  onChanged: (_) => setState(() {}),
                   style: const TextStyle(fontSize: 16, height: 1.6),
                   decoration: const InputDecoration(
-                    hintText:
-                    '자유게시판 이용 규칙입니다.욕설, 비방 등의 표현을 사용하시면 처벌받을 수 있으니 주의해서 이용해 주세요.',
+                    hintText: '자유게시판 이용 규칙입니다. 욕설, 비방 등의 표현을 사용하시면 처벌받을 수 있으니 주의해서 이용해 주세요.',
                     hintStyle: TextStyle(
                       fontSize: 14,
                       color: CustomTheme.neutral300,
@@ -135,8 +140,7 @@ class _BoardCreateScreenState extends State<BoardCreateScreen> {
                     border: Border.all(color: CustomTheme.neutral200),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.image_outlined,
-                      size: 24, color: CustomTheme.neutral300),
+                  child: const Icon(Icons.image_outlined, size: 24, color: CustomTheme.neutral300),
                 ),
               ),
               const Divider(thickness: 1, color: CustomTheme.neutral100),
@@ -151,9 +155,7 @@ class _BoardCreateScreenState extends State<BoardCreateScreen> {
                               ? Icons.check_circle
                               : Icons.radio_button_unchecked,
                           size: 18,
-                          color: _isAnonymous
-                              ? cs.primary
-                              : CustomTheme.neutral200,
+                          color: _isAnonymous ? cs.primary : CustomTheme.neutral200,
                         ),
                         const SizedBox(width: 6),
                         const Text('익명', style: TextStyle(fontSize: 14)),
