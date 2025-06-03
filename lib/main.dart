@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
 import 'package:yeowoobi_frontend/etc/screens/login_screen.dart';
-import 'package:yeowoobi_frontend/etc/screens/home_screen.dart';
 import 'package:yeowoobi_frontend/etc/screens/splash_screen.dart';
 import 'package:yeowoobi_frontend/widgets/custom_theme.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart';
@@ -21,10 +19,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: CustomTheme.lightTheme,
-      title: 'Yeowoobi',
       darkTheme: CustomTheme.darkTheme,
       themeMode: ThemeMode.system,
-      title: 'Yeowoobi',
+      title: 'Yeowoobi', // ✅ title 하나만 남김
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
@@ -35,7 +32,6 @@ class MyApp extends StatelessWidget {
         Locale('en'),
         Locale('ko'),
       ],
-      //  iphone 기준으로 화면 크기 제한
       builder: (context, child) {
         return Center(
           child: ConstrainedBox(
@@ -45,8 +41,7 @@ class MyApp extends StatelessWidget {
           ),
         );
       },
-      home: const HomeScreen(),
-      home: SplashScreen(), // ✅ 닉네임 설정 화면부터
+      home: SplashScreen(),
     );
   }
 }

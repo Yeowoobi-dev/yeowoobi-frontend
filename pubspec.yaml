@@ -15,7 +15,6 @@ dependencies:
   path_provider: ^2.1.1
   http: ^0.13.6
   flutter_dotenv: ^5.2.1
-  kakao_flutter_sdk_user: ^1.9.7+3
   kakao_flutter_sdk_user: ^1.9.5
   shared_preferences: ^2.2.0
 
