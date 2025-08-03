@@ -12,10 +12,6 @@ class MyBookLogService {
     try {
       final response = await http.get(
         url,
-        headers: {
-          'Authorization':
-              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImExOTY1MjE1LWRkZDUtNDBlNS04NjZmLTQyNDMxZWE4OGE0ZCIsImlhdCI6MTc0ODc0OTk4MCwiZXhwIjoxNzUxMzQxOTgwfQ.2unp5SCwOVZwpQXX2-cbW1YEM7rttWTORS4W9qR-JaI',
-        },
       );
 
       // 디버깅용 로그 from book_service.dart
